@@ -37,7 +37,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState<Stats>({ streak: 0, total_this_month: 0, week: [] })
   const [checkedInToday, setCheckedInToday] = useState(false)
 
-  useEffect(() => {
+  const fetchStats = () => {
     get<Stats>('/api/checkins/stats')
       .then(data => {
         setStats(data)
@@ -45,6 +45,13 @@ export default function Dashboard() {
         setCheckedInToday(data.week.some(d => d.date === today && d.calm_avg !== null))
       })
       .catch(() => {})
+  }
+
+  useEffect(() => {
+    fetchStats()
+    // Refresh on window focus
+    window.addEventListener('focus', fetchStats)
+    return () => window.removeEventListener('focus', fetchStats)
   }, [])
 
   return (
