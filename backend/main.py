@@ -8,10 +8,11 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="ASTER API", version="0.1.0")
 
+origins = settings.allowed_origins.split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.allowed_origins.split(","),
-    allow_credentials=True,
+    allow_origins=["*"] if "*" in origins else origins,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
