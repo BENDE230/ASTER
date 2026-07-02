@@ -36,12 +36,19 @@ export default function Dashboard() {
 
   const [stats, setStats] = useState<Stats>({ streak: 0, total_this_month: 0, week: [] })
   const [checkedInToday, setCheckedInToday] = useState(false)
+  const [isPremium, setIsPremium] = useState(false)
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     if (params.get('upgraded') === 'true') {
-      post('/api/stripe/activate-premium', {}).catch(() => {})
+      post<{ is_premium: boolean }>('/api/stripe/activate-premium', {})
+        .then(data => { if (data?.is_premium) setIsPremium(true) })
+        .catch(() => {})
       window.history.replaceState({}, '', '/dashboard')
+    } else {
+      get<{ is_premium: boolean }>('/api/stripe/user-status')
+        .then(data => { if (data?.is_premium) setIsPremium(true) })
+        .catch(() => {})
     }
   }, [])
 
@@ -64,7 +71,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-navy-950 flex">
-      <Sidebar />
+      <Sidebar isPremium={isPremium} />
 
       <main className="ml-[210px] flex-1 px-8 py-8 max-w-3xl">
         {/* Header */}

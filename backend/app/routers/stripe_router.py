@@ -9,6 +9,14 @@ from ..models.user import User
 router = APIRouter(prefix="/api/stripe", tags=["stripe"])
 stripe.api_key = settings.stripe_secret_key
 
+@router.get("/user-status")
+async def get_user_status(
+    db: Session = Depends(get_db),
+    user_id: str = Depends(get_current_user_id),
+):
+    user = db.query(User).filter(User.id == user_id).first()
+    return {"is_premium": user.is_premium if user else False}
+
 @router.post("/activate-premium")
 async def activate_premium(
     db: Session = Depends(get_db),
