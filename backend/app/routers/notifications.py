@@ -24,8 +24,13 @@ def get_email_html(user_name: str, app_url: str) -> str:
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Ton check-in ASTER</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    * {{ font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important; }}
+  </style>
 </head>
-<body style="margin:0;padding:0;background-color:#060912;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+<body style="margin:0;padding:0;background-color:#060912;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#060912;padding:48px 16px;">
     <tr>
       <td align="center">
@@ -36,11 +41,11 @@ def get_email_html(user_name: str, app_url: str) -> str:
             <td align="center" style="padding-bottom:32px;">
               <table role="presentation" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="background-color:#7c73e6;width:36px;height:36px;border-radius:50%;" align="center" valign="middle">
-                    <span style="color:#ffffff;font-size:18px;line-height:36px;display:block;">&#9790;</span>
+                  <td style="background-color:#7c73e6;width:38px;height:38px;border-radius:50%;text-align:center;vertical-align:middle;">
+                    <span style="color:#ffffff;font-size:20px;line-height:38px;display:block;font-style:normal;">🌙</span>
                   </td>
-                  <td style="padding-left:10px;">
-                    <span style="color:#e2e8f0;font-size:15px;font-weight:700;letter-spacing:0.15em;">ASTER</span>
+                  <td style="padding-left:10px;vertical-align:middle;">
+                    <span style="color:#f1f5f9;font-size:15px;font-weight:700;letter-spacing:0.18em;font-family:'Inter',-apple-system,sans-serif;">ASTER</span>
                   </td>
                 </tr>
               </table>
