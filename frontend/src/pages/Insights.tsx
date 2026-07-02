@@ -70,18 +70,18 @@ export default function Insights() {
 
           {/* Line chart — premium */}
           <div className="relative rounded-xl border border-navy-700 bg-navy-800 p-5 overflow-hidden">
-            <p className="section-title mb-4 opacity-30">Calme perçu · 7 jours</p>
-            {/* Fake chart background */}
-            <div className="h-40 flex items-end gap-1 opacity-15 mb-2">
+            <p className={`section-title mb-4 ${isPremium ? '' : 'opacity-30'}`}>Calme perçu · 7 jours</p>
+            <div className={`h-40 flex items-end gap-1 mb-2 ${isPremium ? 'opacity-100' : 'opacity-15'}`}>
               {[4,6,5,7,5,8,6].map((v, i) => (
                 <div key={i} className="flex-1 bg-periwinkle-500 rounded-sm" style={{ height: `${v * 12}%` }} />
               ))}
             </div>
-            <TrendingUp size={20} className="text-slate-600 absolute top-16 left-1/2 -translate-x-1/2 opacity-30" />
-            <PremiumGate
-              title="Graphique Premium"
-              className="absolute inset-4"
-            />
+            {!isPremium && (
+              <>
+                <TrendingUp size={20} className="text-slate-600 absolute top-16 left-1/2 -translate-x-1/2 opacity-30" />
+                <PremiumGate title="Graphique Premium" className="absolute inset-4" />
+              </>
+            )}
           </div>
         </div>
 
@@ -90,13 +90,16 @@ export default function Insights() {
           <p className="section-title mb-3">Patterns détectés</p>
           <div className="space-y-2">
             {PATTERNS.map(p => (
-              <div key={p.label} className={`rounded-xl border border-navy-700 bg-navy-800 px-4 py-3.5 ${p.premium ? 'opacity-50 relative overflow-hidden' : ''}`}>
-                <p className={`text-sm font-semibold mb-0.5 ${p.premium ? 'blur-sm select-none text-slate-300' : 'text-white'}`}>{p.label}</p>
+              <div key={p.label} className={`rounded-xl border border-navy-700 bg-navy-800 px-4 py-3.5 ${p.premium && !isPremium ? 'opacity-50 relative overflow-hidden' : ''}`}>
+                <p className={`text-sm font-semibold mb-0.5 ${p.premium && !isPremium ? 'blur-sm select-none text-slate-300' : 'text-white'}`}>{p.label}</p>
                 {p.description && (
                   <p className="text-xs text-slate-500">{p.description}</p>
                 )}
-                {p.premium && (
-                  <p className={`text-xs blur-sm select-none text-slate-500`}>Détection automatique de tes tendances comportementales sur la semaine.</p>
+                {p.premium && !isPremium && (
+                  <p className="text-xs blur-sm select-none text-slate-500">Détection automatique de tes tendances comportementales sur la semaine.</p>
+                )}
+                {p.premium && isPremium && (
+                  <p className="text-xs text-slate-500">Détection automatique de tes tendances comportementales sur la semaine.</p>
                 )}
               </div>
             ))}
@@ -114,12 +117,16 @@ export default function Insights() {
         </div>
 
         {/* Weekly note — premium */}
-        <div className="flex items-center gap-3 rounded-xl border border-amber-500/20 bg-navy-800 px-5 py-4">
-          <Lock size={14} className="text-amber-400 flex-shrink-0" />
+        <div className="flex items-center gap-3 rounded-xl border border-navy-700 bg-navy-800 px-5 py-4">
+          {!isPremium && <Lock size={14} className="text-amber-400 flex-shrink-0" />}
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-amber-400 mb-0.5">Note de la semaine · Premium</p>
+            <p className={`text-xs font-semibold uppercase tracking-widest mb-0.5 ${isPremium ? 'text-periwinkle-400' : 'text-amber-400'}`}>
+              Note de la semaine {!isPremium && '· Premium'}
+            </p>
             <p className="text-xs text-slate-500 leading-relaxed">
-              Une synthèse personnalisée de tes patterns, rédigée chaque semaine par l'IA — disponible à partir de 1€.
+              {isPremium
+                ? 'Ta synthèse IA sera disponible chaque semaine selon tes entrées.'
+                : "Une synthèse personnalisée de tes patterns, rédigée chaque semaine par l'IA — disponible à partir de 1€."}
             </p>
           </div>
         </div>
