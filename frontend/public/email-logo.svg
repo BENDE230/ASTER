@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="110" height="34" viewBox="0 0 110 34">
+  <!-- Purple circle -->
+  <circle cx="17" cy="17" r="17" fill="#7c73e6"/>
+  <!-- Lucide Moon icon (white, centered, scaled to 16x16 inside circle) -->
+  <g transform="translate(9, 9) scale(0.667)">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="white" stroke="none"/>
+  </g>
+  <!-- ASTER text -->
+  <text x="42" y="22" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#f1f5f9" letter-spacing="2.5">ASTER</text>
+</svg>
