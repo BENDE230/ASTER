@@ -35,19 +35,34 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
     sig_header = request.headers.get("stripe-signature", "")
 
     try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, settings.stripe_webhook_secret
-        )
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid webhook")
+        if settings.stripe_webhook_secret:
+            event = stripe.Webhook.construct_event(
+                payload, sig_header, settings.stripe_webhook_secret
+            )
+        else:
+            import json
+            event = json.loads(payload)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid webhook: {str(e)}")
 
-    if event["type"] == "checkout.session.completed":
-        session = event["data"]["object"]
-        user_id = session.get("client_reference_id")
-        if user_id:
-            user = db.query(User).filter(User.id == user_id).first()
-            if user:
-                user.is_premium = True
+    try:
+        if event["type"] == "checkout.session.completed":
+            session = event["data"]["object"]
+            user_id = session.get("client_reference_id")
+            customer_email = session.get("customer_details", {}).get("email") or session.get("customer_email")
+            if user_id:
+                user = db.query(User).filter(User.id == user_id).first()
+                if not user:
+                    user = User(
+                        id=user_id,
+                        email=customer_email or "",
+                        is_premium=True,
+                    )
+                    db.add(user)
+                else:
+                    user.is_premium = True
                 db.commit()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"DB error: {str(e)}")
 
     return {"status": "ok"}
