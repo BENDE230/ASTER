@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useUser, useClerk } from '@clerk/clerk-react'
-import { LogOut, Crown, CreditCard, Calendar, ChevronRight, HelpCircle, User, Shield, ExternalLink } from 'lucide-react'
+import { LogOut, Crown, CreditCard, Calendar, ChevronRight, HelpCircle, User, Shield, ExternalLink, Bell, BellOff, Send } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
 import { useApi } from '../hooks/useApi'
 
@@ -9,6 +9,12 @@ interface Subscription {
   plan: 'monthly' | 'yearly' | null
   ends_at: string | null
   customer_id: string | null
+}
+
+interface NotifSettings {
+  enabled: boolean
+  hour: number
+  email: string | null
 }
 
 function formatDate(iso: string) {
@@ -20,10 +26,14 @@ function formatDate(iso: string) {
 export default function Profile() {
   const { user } = useUser()
   const { signOut } = useClerk()
-  const { get, post } = useApi()
+  const { get, post, patch } = useApi()
   const [sub, setSub] = useState<Subscription | null>(null)
   const [loadingSub, setLoadingSub] = useState(true)
   const [loadingPortal, setLoadingPortal] = useState(false)
+  const [notif, setNotif] = useState<NotifSettings>({ enabled: false, hour: 9, email: null })
+  const [savingNotif, setSavingNotif] = useState(false)
+  const [sendingTest, setSendingTest] = useState(false)
+  const [testSent, setTestSent] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -36,8 +46,44 @@ export default function Profile() {
         setLoadingSub(false)
       }
     }
+    const loadNotif = async () => {
+      try {
+        const data = await get<NotifSettings>('/api/notifications/settings')
+        setNotif(prev => ({
+          ...data,
+          email: data.email ?? user?.primaryEmailAddress?.emailAddress ?? null,
+        }))
+      } catch {}
+    }
     load()
-  }, [])
+    loadNotif()
+  }, [user])
+
+  const saveNotif = async (updated: Partial<NotifSettings>) => {
+    const next = { ...notif, ...updated }
+    setNotif(next)
+    setSavingNotif(true)
+    try {
+      await patch('/api/notifications/settings', {
+        enabled: next.enabled,
+        hour: next.hour,
+        email: next.email,
+      })
+    } catch {} finally {
+      setSavingNotif(false)
+    }
+  }
+
+  const sendTestEmail = async () => {
+    setSendingTest(true)
+    try {
+      await post('/api/notifications/test-email', {})
+      setTestSent(true)
+      setTimeout(() => setTestSent(false), 3000)
+    } catch {} finally {
+      setSendingTest(false)
+    }
+  }
 
   const handlePortal = async () => {
     setLoadingPortal(true)
@@ -184,6 +230,77 @@ export default function Profile() {
               </span>
             </div>
           </div>
+        </div>
+
+        {/* Notifications */}
+        <div className="rounded-xl border border-navy-700 bg-navy-800 overflow-hidden mb-4">
+          <div className="px-5 py-3 border-b border-navy-700 flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Rappels quotidiens</p>
+            <button
+              onClick={() => saveNotif({ enabled: !notif.enabled })}
+              className={`relative w-10 h-5 rounded-full transition-colors ${notif.enabled ? 'bg-periwinkle-500' : 'bg-navy-600'}`}
+            >
+              <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${notif.enabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
+            </button>
+          </div>
+
+          {notif.enabled && (
+            <div className="px-5 py-4 space-y-4">
+              {/* Email */}
+              <div>
+                <label className="text-xs text-slate-500 mb-1.5 block">Email de rappel</label>
+                <input
+                  type="email"
+                  value={notif.email ?? ''}
+                  onChange={e => setNotif(prev => ({ ...prev, email: e.target.value }))}
+                  onBlur={() => saveNotif({})}
+                  placeholder="ton@email.com"
+                  className="w-full bg-navy-700 border border-navy-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-periwinkle-500/50"
+                />
+              </div>
+
+              {/* Hour */}
+              <div>
+                <label className="text-xs text-slate-500 mb-1.5 block">
+                  Heure du rappel — <span className="text-white">{notif.hour}h00</span>
+                </label>
+                <input
+                  type="range"
+                  min={6}
+                  max={22}
+                  value={notif.hour}
+                  onChange={e => setNotif(prev => ({ ...prev, hour: parseInt(e.target.value) }))}
+                  onMouseUp={() => saveNotif({})}
+                  onTouchEnd={() => saveNotif({})}
+                  className="w-full accent-periwinkle-500"
+                />
+                <div className="flex justify-between text-xs text-slate-600 mt-1">
+                  <span>6h</span><span>14h</span><span>22h</span>
+                </div>
+              </div>
+
+              {/* Test button */}
+              <button
+                onClick={sendTestEmail}
+                disabled={!notif.email || sendingTest}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg border border-navy-600 text-sm text-slate-300 hover:bg-navy-700 transition-colors disabled:opacity-40"
+              >
+                <Send size={12} />
+                {testSent ? '✓ Email envoyé !' : sendingTest ? 'Envoi...' : 'Envoyer un email test'}
+              </button>
+
+              {savingNotif && <p className="text-xs text-slate-600">Sauvegarde...</p>}
+            </div>
+          )}
+
+          {!notif.enabled && (
+            <div className="px-5 py-4 flex items-center gap-3">
+              <BellOff size={14} className="text-slate-600 flex-shrink-0" />
+              <p className="text-xs text-slate-500">
+                Active les rappels pour recevoir un email chaque jour à l'heure de ton choix.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Sign out */}

@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     stripe_price_id_yearly: str = ""
     stripe_webhook_secret: str = ""
     openai_api_key: str = ""
+    resend_api_key: str = ""
+    app_url: str = "https://aster-amber.vercel.app"
 
     class Config:
         env_file = ".env"

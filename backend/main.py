@@ -5,6 +5,7 @@ from app.database import Base, engine
 from app.routers import onboarding, checkin, journal, insights
 from app.routers import stripe_router
 from app.routers import ai
+from app.routers import notifications
 
 Base.metadata.create_all(bind=engine)
 
@@ -19,6 +20,9 @@ def run_migrations():
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_customer_id VARCHAR",
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_plan VARCHAR",
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_ends_at TIMESTAMP",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS notifications_enabled BOOLEAN DEFAULT FALSE",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS notification_hour INTEGER DEFAULT 9",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS notification_email VARCHAR",
         ]
         for sql in migrations:
             try:
@@ -48,6 +52,7 @@ app.include_router(journal.router)
 app.include_router(insights.router)
 app.include_router(stripe_router.router)
 app.include_router(ai.router)
+app.include_router(notifications.router)
 
 @app.get("/health")
 def health():
