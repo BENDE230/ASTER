@@ -17,81 +17,97 @@ CHECKIN_FEELINGS = [
 ]
 
 def get_email_html(user_name: str, app_url: str) -> str:
-    return f"""
-<!DOCTYPE html>
-<html>
+    greeting = f"Bonjour{' ' + user_name if user_name else ''}"
+    return f"""<!DOCTYPE html>
+<html lang="fr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Ton check-in ASTER</title>
 </head>
-<body style="margin:0;padding:0;background:#0a0d1a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0d1a;padding:40px 16px;">
+<body style="margin:0;padding:0;background-color:#060912;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#060912;padding:48px 16px;">
     <tr>
       <td align="center">
-        <table width="480" cellpadding="0" cellspacing="0" style="background:#111827;border:1px solid #1e2640;border-radius:16px;overflow:hidden;">
-          <!-- Header -->
+        <table role="presentation" width="520" cellpadding="0" cellspacing="0" style="width:100%;max-width:520px;">
+
+          <!-- Logo -->
           <tr>
-            <td style="padding:28px 32px;border-bottom:1px solid #1e2640;">
-              <table cellpadding="0" cellspacing="0">
+            <td align="center" style="padding-bottom:32px;">
+              <table role="presentation" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="background:#7c73e6;width:28px;height:28px;border-radius:50%;text-align:center;vertical-align:middle;">
-                    <span style="color:white;font-size:14px;">◗</span>
+                  <td style="background-color:#7c73e6;width:36px;height:36px;border-radius:50%;" align="center" valign="middle">
+                    <span style="color:#ffffff;font-size:18px;line-height:36px;display:block;">&#9790;</span>
                   </td>
-                  <td style="padding-left:10px;color:#e2e8f0;font-size:14px;font-weight:600;letter-spacing:0.1em;">ASTER</td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-          <!-- Body -->
-          <tr>
-            <td style="padding:32px;">
-              <p style="margin:0 0 8px;color:#94a3b8;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;">Check-in émotionnel</p>
-              <h1 style="margin:0 0 16px;color:#ffffff;font-size:22px;font-weight:700;line-height:1.3;">
-                Bonjour{' ' + user_name if user_name else ''} 🌿
-              </h1>
-              <p style="margin:0 0 24px;color:#94a3b8;font-size:15px;line-height:1.6;">
-                Comment te sens-tu aujourd'hui ? Prends 30 secondes pour faire ton check-in
-                et recevoir un protocole adapté à ton état.
-              </p>
-              <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
-                <tr>
-                  <td style="background:#1e2640;border-radius:12px;padding:16px;">
-                    <p style="margin:0 0 10px;color:#7c73e6;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;">Rappel</p>
-                    <p style="margin:0;color:#cbd5e1;font-size:14px;line-height:1.5;">
-                      Nommer ce que tu ressens, c'est déjà le réguler. Le check-in prend 30 secondes.
-                    </p>
-                  </td>
-                </tr>
-              </table>
-              <table cellpadding="0" cellspacing="0" style="width:100%;">
-                <tr>
-                  <td align="center">
-                    <a href="{app_url}/checkin" style="display:inline-block;background:#7c73e6;color:white;font-size:15px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:12px;">
-                      Faire mon check-in →
-                    </a>
+                  <td style="padding-left:10px;">
+                    <span style="color:#e2e8f0;font-size:15px;font-weight:700;letter-spacing:0.15em;">ASTER</span>
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
-          <!-- Footer -->
+
+          <!-- Card -->
           <tr>
-            <td style="padding:20px 32px;border-top:1px solid #1e2640;">
-              <p style="margin:0;color:#334155;font-size:12px;text-align:center;">
-                Tu reçois cet email car tu as activé les rappels dans ASTER.
-                <br>
-                <a href="{app_url}/profile" style="color:#475569;text-decoration:underline;">Gérer mes préférences</a>
-              </p>
+            <td style="background-color:#0f1629;border:1px solid #1e2d4a;border-radius:20px;overflow:hidden;">
+
+              <!-- Top accent bar -->
+              <tr>
+                <td style="background:linear-gradient(90deg,#7c73e6,#a78bfa);height:3px;font-size:0;line-height:0;">&nbsp;</td>
+              </tr>
+
+              <!-- Body -->
+              <tr>
+                <td style="padding:40px 40px 32px;">
+                  <p style="margin:0 0 6px 0;color:#7c73e6;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;">Check-in émotionnel</p>
+                  <h1 style="margin:0 0 20px 0;color:#f1f5f9;font-size:26px;font-weight:700;line-height:1.25;">{greeting} &#127807;</h1>
+                  <p style="margin:0 0 28px 0;color:#94a3b8;font-size:15px;line-height:1.7;">
+                    Comment te sens-tu aujourd&apos;hui&nbsp;? Prends <strong style="color:#e2e8f0;">30 secondes</strong> pour faire ton check-in et recevoir un protocole adapté à ton état du moment.
+                  </p>
+
+                  <!-- Quote box -->
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
+                    <tr>
+                      <td style="background-color:#131d35;border-left:3px solid #7c73e6;border-radius:0 12px 12px 0;padding:16px 20px;">
+                        <p style="margin:0;color:#cbd5e1;font-size:14px;line-height:1.6;font-style:italic;">
+                          &ldquo;Nommer ce que tu ressens, c&apos;est déjà commencer à le réguler.&rdquo;
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <!-- CTA Button -->
+                  <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+                    <tr>
+                      <td style="background-color:#7c73e6;border-radius:12px;">
+                        <a href="{app_url}/checkin" style="display:inline-block;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;padding:15px 36px;letter-spacing:0.02em;">
+                          Faire mon check-in &rarr;
+                        </a>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+
+              <!-- Footer -->
+              <tr>
+                <td style="padding:20px 40px;border-top:1px solid #1e2d4a;">
+                  <p style="margin:0;color:#374151;font-size:12px;text-align:center;line-height:1.6;">
+                    Tu reçois cet email car tu as activé les rappels dans ASTER.<br>
+                    <a href="{app_url}/profile" style="color:#4b5563;text-decoration:underline;">Gérer mes préférences</a>
+                  </p>
+                </td>
+              </tr>
+
             </td>
           </tr>
+
         </table>
       </td>
     </tr>
   </table>
 </body>
-</html>
-"""
+</html>"""
 
 class NotificationSettings(BaseModel):
     enabled: bool
