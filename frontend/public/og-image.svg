@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" fill="none">
+  <rect width="1200" height="630" fill="#0a0e1a"/>
+  <!-- Glow -->
+  <ellipse cx="600" cy="315" rx="400" ry="250" fill="#6366f1" fill-opacity="0.08"/>
+  <!-- Logo circle -->
+  <circle cx="600" cy="230" r="60" fill="#6366f1"/>
+  <!-- Moon icon -->
+  <path d="M620 208C620 208 613 211 609 217C605 223 605 231 609 237C613 243 620 246 620 246C620 246 611 252 602 250C593 248 586 239 586 230C586 221 593 212 602 210C611 208 620 208 620 208Z" fill="white"/>
+  <!-- ASTER text -->
+  <text x="600" y="330" font-family="system-ui, -apple-system, sans-serif" font-size="64" font-weight="800" fill="white" text-anchor="middle" letter-spacing="12">ASTER</text>
+  <!-- Tagline -->
+  <text x="600" y="385" font-family="system-ui, -apple-system, sans-serif" font-size="24" fill="#94a3b8" text-anchor="middle">Ton espace calme, quand tu en as besoin.</text>
+</svg>
