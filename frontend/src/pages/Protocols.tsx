@@ -263,6 +263,239 @@ const PROTOCOLS: Protocol[] = [
     ],
     closing: 'Tu mérites la même compassion que tu donnes aux autres. Toujours.',
   },
+  {
+    id: 'recadrage-cognitif',
+    category: 'Anti-rumination',
+    duration: '5 min',
+    title: 'Recadrage cognitif',
+    description: 'Transforme une pensée négative automatique en perspective plus juste.',
+    premium: true,
+    goal: 'Identifier les distorsions cognitives et remplacer les pensées automatiques destructrices.',
+    when: 'Quand une pensée négative tourne en boucle, après un conflit ou une critique reçue.',
+    steps: [
+      {
+        title: 'Identifie la pensée',
+        instruction: 'Quelle est exactement la pensée qui revient ? Écris-la ou formule-la clairement : "Je suis nul·le", "Ça ne marchera jamais", "Tout le monde me juge"... Sois précis·e.',
+        duration: '1 min',
+      },
+      {
+        title: 'Évalue la preuve',
+        instruction: 'Pose-toi cette question : quelles sont les preuves concrètes que cette pensée est vraie ? Et quelles sont les preuves qu\'elle est fausse ou exagérée ? Les deux côtés.',
+        duration: '1 min 30',
+      },
+      {
+        title: 'Cherche l\'alternative',
+        instruction: 'Si un·e ami·e te disait cette pensée sur lui/elle, que lui répondrais-tu ? Formule une pensée alternative plus équilibrée — pas forcément positive, juste plus réaliste.',
+        duration: '1 min',
+      },
+      {
+        title: 'Teste l\'impact',
+        instruction: 'Compare les deux pensées. La pensée automatique vs la pensée alternative. Laquelle te donne plus d\'espace pour agir ? Laquelle est plus utile pour toi maintenant ?',
+        duration: '30 sec',
+      },
+      {
+        title: 'Ancre la nouvelle perspective',
+        instruction: 'Répète la pensée alternative 3 fois, lentement. Pas pour te convaincre de force — juste pour l\'inscrire. Prends une grande inspiration. Expire lentement.',
+        duration: '1 min',
+      },
+    ],
+    closing: 'Les pensées ne sont pas des faits. Tu peux les questionner — et choisir celle qui t\'aide à avancer.',
+  },
+  {
+    id: 'respiration-478',
+    category: 'Respiration',
+    duration: '4 min',
+    title: 'Respiration 4-7-8',
+    description: 'Une technique puissante pour calmer rapidement le système nerveux.',
+    premium: true,
+    goal: 'Activer la réponse de relaxation profonde et réduire l\'anxiété en moins de 4 minutes.',
+    when: 'Avant de dormir, lors d\'une crise d\'anxiété, ou quand tu ressens une montée de stress intense.',
+    steps: [
+      {
+        title: 'Prépare-toi',
+        instruction: 'Assieds-toi ou allonge-toi. Vide complètement tes poumons par la bouche avec un soupir audible. Pose ta langue derrière tes dents du haut — elle y reste tout au long.',
+        duration: '30 sec',
+      },
+      {
+        title: 'Inspire — 4 secondes',
+        instruction: 'Ferme la bouche. Inspire silencieusement par le nez en comptant 1... 2... 3... 4. Sens ton ventre et ta poitrine se gonfler doucement.',
+        duration: '4 sec',
+      },
+      {
+        title: 'Retiens — 7 secondes',
+        instruction: 'Retiens ta respiration, bouche fermée, en comptant 1... 2... 3... 4... 5... 6... 7. Ne force pas. Si c\'est trop long au début, adapte le rythme.',
+        duration: '7 sec',
+      },
+      {
+        title: 'Expire — 8 secondes',
+        instruction: 'Expire complètement par la bouche avec un son de souffle en comptant 1... 2... 3... 4... 5... 6... 7... 8. C\'est l\'expiration la plus importante — laisse tout sortir.',
+        duration: '8 sec',
+      },
+      {
+        title: 'Répète 4 cycles',
+        instruction: 'Recommence depuis l\'inspiration. Fais 4 cycles complets. Après le 4ème, reprends une respiration naturelle et remarque le calme qui s\'installe.',
+        duration: '3 min',
+      },
+    ],
+    closing: 'Cette technique agit comme un tranquillisant naturel sur ton système nerveux. Pratique-la quotidiennement pour un effet durable.',
+  },
+  {
+    id: 'relaxation-musculaire',
+    category: 'Retour au corps',
+    duration: '10 min',
+    title: 'Relaxation musculaire progressive',
+    description: 'Contracte et relâche chaque groupe musculaire pour libérer les tensions profondes.',
+    premium: true,
+    goal: 'Relâcher les tensions musculaires chroniques liées au stress et induire un état de calme profond.',
+    when: 'En cas de tension physique importante, avant de dormir, ou après une longue journée stressante.',
+    steps: [
+      {
+        title: 'Position et respiration',
+        instruction: 'Allonge-toi sur le dos, les bras le long du corps. Prends 3 grandes inspirations lentes. Avec chaque expiration, sens ton corps s\'alourdir un peu plus.',
+        duration: '1 min',
+      },
+      {
+        title: 'Pieds et mollets',
+        instruction: 'Contracte fortement tes orteils et tes pieds pendant 5 secondes — comme si tu voulais les recroqueviller. Puis relâche d\'un coup. Remarque la différence. Répète avec les mollets.',
+        duration: '2 min',
+      },
+      {
+        title: 'Cuisses, fessiers, ventre',
+        instruction: 'Contracte les cuisses en serrant fort, puis les fessiers, puis le ventre. 5 secondes chacun, puis relâche. Sens la chaleur qui se répand dans ces zones.',
+        duration: '2 min',
+      },
+      {
+        title: 'Mains, bras, épaules',
+        instruction: 'Serre les poings fort pendant 5 secondes. Relâche. Contracte les avant-bras. Relâche. Monte jusqu\'aux épaules — hausse-les vers les oreilles 5 secondes. Laisse-les tomber.',
+        duration: '2 min',
+      },
+      {
+        title: 'Visage et nuque',
+        instruction: 'Plisse le visage entier : front, yeux, mâchoire serrée, 5 secondes. Puis relâche tout d\'un coup. Pousse doucement ta tête contre le sol pour contracter la nuque. Relâche.',
+        duration: '2 min',
+      },
+      {
+        title: 'Intégration finale',
+        instruction: 'Parcours mentalement ton corps de la tête aux pieds. S\'il reste une zone tendue, contracte-la une dernière fois et relâche. Reste dans ce calme quelques instants.',
+        duration: '1 min',
+      },
+    ],
+    closing: 'Ton corps sait se détendre. Tu lui as juste rappelé comment.',
+  },
+  {
+    id: 'decharge-nerveuse',
+    category: 'Hypervigilance',
+    duration: '6 min',
+    title: 'Décharge du système nerveux',
+    description: 'Libère l\'énergie de survie bloquée dans le corps après un état de stress intense.',
+    premium: true,
+    goal: 'Permettre au corps de compléter la réponse de stress interrompue et retrouver l\'équilibre.',
+    when: 'Après une situation stressante, une dispute, une peur intense, ou quand le corps reste "sur les nerfs".',
+    steps: [
+      {
+        title: 'Mouvement de tremblements',
+        instruction: 'Debout ou assis, laisse tes jambes vibrer légèrement — comme si tu tremblais de froid. Ce tremblement naturel est ce que les animaux font après un stress pour se "décharger". 1 minute.',
+        duration: '1 min',
+      },
+      {
+        title: 'Secousse des bras',
+        instruction: 'Secoue tes bras le long du corps, comme si tu voulais te débarrasser de l\'eau sur tes mains. Laisse cette secousse remonter jusqu\'aux épaules. Reste souple.',
+        duration: '1 min',
+      },
+      {
+        title: 'Le soupir de libération',
+        instruction: 'Inspire profondément par le nez. Puis expire en laissant un son sortir — "aaah", "ohhh", ou un soupir sonore. Sans te censurer. Le son aide à libérer la tension du diaphragme.',
+        duration: '1 min',
+      },
+      {
+        title: 'Marche de décharge',
+        instruction: 'Marche dans l\'espace — même sur place. En marchant, balance les bras librement. Commence lentement, accélère légèrement, puis ralentis. La marche aide à compléter la réponse de fuite.',
+        duration: '2 min',
+      },
+      {
+        title: 'Retour au calme',
+        instruction: 'Arrête-toi. Pose les deux pieds au sol. Prends 3 respirations lentes. Pose une main sur le sternum, l\'autre sur le ventre. Sens ton cœur ralentir.',
+        duration: '1 min',
+      },
+    ],
+    closing: 'Le stress est une énergie — tu viens de lui donner une sortie. Ton corps peut se réinitialiser maintenant.',
+  },
+  {
+    id: 'rituel-endormissement',
+    category: 'Sommeil',
+    duration: '8 min',
+    title: 'Rituel d\'endormissement',
+    description: 'Un protocole complet pour préparer ton cerveau et ton corps au sommeil.',
+    premium: true,
+    goal: 'Créer un pont entre l\'état d\'éveil et le sommeil en apaisant le mental et le corps.',
+    when: 'Dans les 20 minutes avant le coucher. À faire dans ta chambre, lumière tamisée.',
+    steps: [
+      {
+        title: 'Coupe le flux',
+        instruction: 'Pose ton téléphone face vers le bas hors de portée. Tamise la lumière. Cette coupure physique dit à ton cerveau que le mode "actif" est terminé. 30 secondes pour t\'installer.',
+        duration: '30 sec',
+      },
+      {
+        title: 'Bilan de gratitude',
+        instruction: 'Nomme mentalement 3 choses qui se sont bien passées aujourd\'hui — même petites. Un café chaud, une conversation, un moment de calme. La gratitude réduit le cortisol.',
+        duration: '1 min 30',
+      },
+      {
+        title: 'Libère les non-terminés',
+        instruction: 'Qu\'est-ce qui reste en suspens dans ton esprit ? Nomme-le simplement et dis : "Je n\'ai pas à régler ça maintenant. Je le confie au demain." Ça suffit à débloquer le mental.',
+        duration: '1 min',
+      },
+      {
+        title: 'Respiration apaisante',
+        instruction: 'Inspire 4 secondes par le nez. Expire 8 secondes par la bouche. L\'expiration deux fois plus longue que l\'inspiration. Fais 5 cycles. Ton rythme cardiaque va naturellement baisser.',
+        duration: '3 min',
+      },
+      {
+        title: 'Scan descendant',
+        instruction: 'Commence par le sommet du crâne. Descends lentement. À chaque zone, expire et relâche. Front... yeux... mâchoire... cou... épaules... poitrine... ventre... jambes... pieds.',
+        duration: '2 min',
+      },
+    ],
+    closing: 'Tu peux laisser tes yeux rester fermés. Ton corps sait ce qu\'il doit faire. Laisse-le faire.',
+  },
+  {
+    id: 'lettre-a-soi',
+    category: 'Sécurité émotionnelle',
+    duration: '8 min',
+    title: 'Lettre à soi-même',
+    description: 'Écris à la partie de toi qui souffre avec la bienveillance d\'un ami proche.',
+    premium: true,
+    goal: 'Créer une distance saine avec la douleur et renforcer la relation bienveillante avec soi-même.',
+    when: 'Après une erreur, une honte, un sentiment d\'échec, ou quand tu es très dur·e envers toi-même.',
+    steps: [
+      {
+        title: 'Prends un stylo (ou ton téléphone)',
+        instruction: 'Écrire à la main crée un effet plus fort, mais n\'importe quel support marche. Installe-toi dans un endroit calme. Prends une grande inspiration.',
+        duration: '30 sec',
+      },
+      {
+        title: 'Commence par le ressenti',
+        instruction: 'Écris ce que tu ressens sans te censurer. "Je me sens...", "J\'ai l\'impression de...", "Ce qui me pèse c\'est...". Pas de mise en forme, juste l\'honnêteté brute.',
+        duration: '2 min',
+      },
+      {
+        title: 'Change de perspective',
+        instruction: 'Maintenant, imagine un·e ami·e très proche qui vit exactement ce que tu vis. Que lui écrirais-tu ? Commence la lettre par "Cher·e [ton prénom]," et écris-lui comme à cet ami.',
+        duration: '3 min',
+      },
+      {
+        title: 'Reconnais l\'effort',
+        instruction: 'Termine en reconnaissant quelque chose que tu fais bien, même en ce moment difficile. Même juste : "Tu continues malgré tout. C\'est courageux."',
+        duration: '1 min',
+      },
+      {
+        title: 'Relis à voix basse',
+        instruction: 'Relis ce que tu as écrit — lentement, pour toi-même. Laisse les mots entrer. Tu mérites d\'entendre ça.',
+        duration: '1 min 30',
+      },
+    ],
+    closing: 'Cette lettre t\'appartient. Garde-la, ou dépose-la. Dans les deux cas, quelque chose en toi a été entendu.',
+  },
 ]
 
 function ProtocolModal({ protocol, onClose }: { protocol: Protocol; onClose: () => void }) {
@@ -439,11 +672,11 @@ export default function Protocols() {
         <h1 className="text-3xl font-bold text-white mb-1">Protocoles de régulation.</h1>
         <p className="text-sm text-slate-400 mb-6">
           {isPremium ? (
-            <><strong className="text-white">6 protocoles</strong> disponibles — accès complet</>
+            <><strong className="text-white">12 protocoles</strong> disponibles — accès complet</>
           ) : (
             <><strong className="text-white">3 protocoles</strong> disponibles ·{' '}
             <button className="text-periwinkle-400 hover:text-periwinkle-300 underline underline-offset-2 transition-colors">
-              Débloquer les 6 en Premium
+              Débloquer les 12 en Premium
             </button></>
           )}
         </p>
