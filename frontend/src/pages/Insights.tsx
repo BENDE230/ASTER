@@ -2,8 +2,7 @@ import { Lock, HelpCircle, TrendingUp } from 'lucide-react'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import Sidebar from '../components/Sidebar'
 import PremiumGate from '../components/PremiumGate'
-
-const isPremium = false
+import { usePremium } from '../hooks/usePremium'
 
 const DOMINANT_STATES = [
   { name: 'Rumination',       value: 38, color: '#9b9ff5' },
@@ -19,6 +18,7 @@ const PATTERNS = [
 ]
 
 export default function Insights() {
+  const isPremium = usePremium()
   return (
     <div className="min-h-screen bg-navy-950 flex">
       <Sidebar />

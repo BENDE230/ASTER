@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Clock, Lock, HelpCircle } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
+import { usePremium } from '../hooks/usePremium'
 
 const CATEGORIES = ['Tous', 'Anti-rumination', 'Respiration', 'Retour au corps', 'Hypervigilance', 'Sommeil', 'Sécurité émotionnelle']
 
@@ -24,6 +25,7 @@ const PROTOCOLS = [
 
 export default function Protocols() {
   const [activeCategory, setActiveCategory] = useState('Tous')
+  const isPremium = usePremium()
 
   const filtered = activeCategory === 'Tous'
     ? PROTOCOLS
@@ -66,24 +68,24 @@ export default function Protocols() {
             <div
               key={p.title}
               className={`rounded-xl border p-5 transition-colors ${
-                p.premium
+                p.premium && !isPremium
                   ? 'border-navy-700 bg-navy-800/50 opacity-60'
                   : 'border-navy-700 bg-navy-800 hover:bg-navy-700 cursor-pointer'
               }`}
             >
               <div className="flex items-center justify-between mb-3">
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${TAG_COLORS[p.category] ?? 'text-slate-400 bg-slate-400/10'} ${p.premium ? 'opacity-60' : ''}`}>
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${TAG_COLORS[p.category] ?? 'text-slate-400 bg-slate-400/10'}`}>
                   {p.category}
                 </span>
                 <div className="flex items-center gap-1.5">
-                  {p.premium && <Lock size={11} className="text-amber-400" />}
-                  {p.premium && <span className="text-xs text-amber-400 font-medium">Premium</span>}
-                  <span className={`text-xs flex items-center gap-1 ${p.premium ? 'text-slate-600' : 'text-slate-500'}`}>
+                  {p.premium && !isPremium && <Lock size={11} className="text-amber-400" />}
+                  {p.premium && !isPremium && <span className="text-xs text-amber-400 font-medium">Premium</span>}
+                  <span className="text-xs flex items-center gap-1 text-slate-500">
                     <Clock size={11} />{p.duration}
                   </span>
                 </div>
               </div>
-              <p className={`text-sm font-semibold mb-1 ${p.premium ? 'text-slate-500' : 'text-white'}`}>{p.title}</p>
+              <p className="text-sm font-semibold mb-1 text-white">{p.title}</p>
               <p className="text-xs text-slate-500 leading-relaxed">{p.description}</p>
             </div>
           ))}

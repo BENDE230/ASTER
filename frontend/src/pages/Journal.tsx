@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Lock, HelpCircle, Sparkles, BookOpen } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
 import { useApi } from '../hooks/useApi'
+import { usePremium } from '../hooks/usePremium'
 
 interface Entry {
   date: string
@@ -20,7 +21,7 @@ export default function Journal() {
   const [saved, setSaved] = useState(false)
   const [saving, setSaving] = useState(false)
   const { post } = useApi()
-  const isPremium = false
+  const isPremium = usePremium()
 
   const today = new Date().toLocaleDateString('fr-FR', {
     weekday: 'long', day: 'numeric', month: 'long',
