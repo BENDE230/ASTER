@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Clock, Lock, HelpCircle, X, ChevronRight, CheckCircle2, Play, Pause } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
 import { usePremium } from '../hooks/usePremium'
@@ -408,6 +409,17 @@ export default function Protocols() {
   const [activeCategory, setActiveCategory] = useState('Tous')
   const [selectedProtocol, setSelectedProtocol] = useState<Protocol | null>(null)
   const isPremium = usePremium()
+  const [searchParams] = useSearchParams()
+
+  useEffect(() => {
+    const openId = searchParams.get('open')
+    if (openId) {
+      const protocol = PROTOCOLS.find(p => p.id === openId)
+      if (protocol && (!protocol.premium || isPremium)) {
+        setSelectedProtocol(protocol)
+      }
+    }
+  }, [searchParams, isPremium])
 
   const filtered = activeCategory === 'Tous'
     ? PROTOCOLS

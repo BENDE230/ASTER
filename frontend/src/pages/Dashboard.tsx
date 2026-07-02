@@ -6,10 +6,10 @@ import Sidebar from '../components/Sidebar'
 import { useApi } from '../hooks/useApi'
 
 const PROTOCOLS = [
-  { tag: 'Anti-rumination', tagColor: 'text-violet-400 bg-violet-400/10', duration: '3 min', title: 'Ancrage par les 5 sens' },
-  { tag: 'Respiration',     tagColor: 'text-blue-400 bg-blue-400/10',     duration: '5 min', title: 'Cohérence cardiaque 4–6' },
-  { tag: 'Retour au corps', tagColor: 'text-emerald-400 bg-emerald-400/10', duration: '7 min', title: 'Scan corporel doux' },
-  { tag: 'Hypervigilance',  tagColor: 'text-rose-400 bg-rose-400/10',     duration: '4 min', title: 'Protocole de sécurité' },
+  { id: 'ancrage-5-sens',       tag: 'Anti-rumination', tagColor: 'text-violet-400 bg-violet-400/10',   duration: '3 min', title: 'Ancrage par les 5 sens' },
+  { id: 'coherence-cardiaque',  tag: 'Respiration',     tagColor: 'text-blue-400 bg-blue-400/10',       duration: '5 min', title: 'Cohérence cardiaque 4–6' },
+  { id: 'scan-corporel',        tag: 'Retour au corps', tagColor: 'text-emerald-400 bg-emerald-400/10', duration: '7 min', title: 'Scan corporel doux' },
+  { id: 'protocole-securite',   tag: 'Hypervigilance',  tagColor: 'text-rose-400 bg-rose-400/10',       duration: '4 min', title: 'Protocole de sécurité' },
 ]
 
 const DAYS = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di']
@@ -161,7 +161,11 @@ export default function Dashboard() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             {PROTOCOLS.map(p => (
-              <button key={p.title} className="text-left rounded-xl border border-navy-700 bg-navy-800 hover:bg-navy-700 p-4 transition-colors">
+              <button
+                key={p.title}
+                onClick={() => navigate(`/protocols?open=${p.id}`)}
+                className="text-left rounded-xl border border-navy-700 bg-navy-800 hover:bg-navy-700 active:scale-95 transition-all p-4"
+              >
                 <div className="flex items-center justify-between mb-2">
                   <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${p.tagColor}`}>{p.tag}</span>
                   <span className="text-xs text-slate-500 flex items-center gap-1"><Clock size={11} />{p.duration}</span>
