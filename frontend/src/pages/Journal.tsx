@@ -227,7 +227,7 @@ export default function Journal() {
     <div className="min-h-screen bg-navy-950 flex">
       <Sidebar />
 
-      <main className="ml-[210px] flex-1 px-8 py-8 max-w-2xl">
+      <main className="md:ml-[210px] flex-1 px-4 md:px-8 py-6 md:py-8 max-w-2xl pb-24 md:pb-8">
         <p className="text-xs text-slate-500 mb-2 font-medium">Journal émotionnel</p>
         <h1 className="text-3xl font-bold text-white mb-1">Écris ce que tu ressens.</h1>
         <p className="text-sm text-slate-400 mb-7">Sans filtre, sans jugement. C'est ton espace.</p>

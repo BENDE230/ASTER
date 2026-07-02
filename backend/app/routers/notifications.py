@@ -18,19 +18,15 @@ CHECKIN_FEELINGS = [
 
 def get_email_html(user_name: str, app_url: str) -> str:
     greeting = f"Bonjour{' ' + user_name if user_name else ''}"
+    font = "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif"
     return f"""<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Ton check-in ASTER</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    * {{ font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important; }}
-  </style>
 </head>
-<body style="margin:0;padding:0;background-color:#060912;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<body style="margin:0;padding:0;background-color:#060912;font-family:{font};">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#060912;padding:48px 16px;">
     <tr>
       <td align="center">
@@ -39,16 +35,7 @@ def get_email_html(user_name: str, app_url: str) -> str:
           <!-- Logo -->
           <tr>
             <td align="center" style="padding-bottom:32px;">
-              <table role="presentation" cellpadding="0" cellspacing="0">
-                <tr>
-                  <td style="background-color:#7c73e6;width:38px;height:38px;border-radius:50%;text-align:center;vertical-align:middle;">
-                    <span style="color:#ffffff;font-size:20px;line-height:38px;display:block;font-style:normal;">🌙</span>
-                  </td>
-                  <td style="padding-left:10px;vertical-align:middle;">
-                    <span style="color:#f1f5f9;font-size:15px;font-weight:700;letter-spacing:0.18em;font-family:'Inter',-apple-system,sans-serif;">ASTER</span>
-                  </td>
-                </tr>
-              </table>
+              <img src="{app_url}/email-logo.svg" width="120" height="36" alt="ASTER" style="display:block;border:0;" />
             </td>
           </tr>
 
@@ -64,9 +51,9 @@ def get_email_html(user_name: str, app_url: str) -> str:
               <!-- Body -->
               <tr>
                 <td style="padding:40px 40px 32px;">
-                  <p style="margin:0 0 6px 0;color:#7c73e6;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;">Check-in émotionnel</p>
-                  <h1 style="margin:0 0 20px 0;color:#f1f5f9;font-size:26px;font-weight:700;line-height:1.25;">{greeting} &#127807;</h1>
-                  <p style="margin:0 0 28px 0;color:#94a3b8;font-size:15px;line-height:1.7;">
+                  <p style="margin:0 0 6px 0;color:#7c73e6;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;font-family:{font};">Check-in émotionnel</p>
+                  <h1 style="margin:0 0 20px 0;color:#f1f5f9;font-size:26px;font-weight:700;line-height:1.25;font-family:{font};">{greeting}</h1>
+                  <p style="margin:0 0 28px 0;color:#94a3b8;font-size:15px;line-height:1.7;font-family:{font};">
                     Comment te sens-tu aujourd&apos;hui&nbsp;? Prends <strong style="color:#e2e8f0;">30 secondes</strong> pour faire ton check-in et recevoir un protocole adapté à ton état du moment.
                   </p>
 
@@ -74,7 +61,7 @@ def get_email_html(user_name: str, app_url: str) -> str:
                   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
                     <tr>
                       <td style="background-color:#131d35;border-left:3px solid #7c73e6;border-radius:0 12px 12px 0;padding:16px 20px;">
-                        <p style="margin:0;color:#cbd5e1;font-size:14px;line-height:1.6;font-style:italic;">
+                        <p style="margin:0;color:#cbd5e1;font-size:14px;line-height:1.6;font-style:italic;font-family:{font};">
                           &ldquo;Nommer ce que tu ressens, c&apos;est déjà commencer à le réguler.&rdquo;
                         </p>
                       </td>
@@ -85,7 +72,7 @@ def get_email_html(user_name: str, app_url: str) -> str:
                   <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
                     <tr>
                       <td style="background-color:#7c73e6;border-radius:12px;">
-                        <a href="{app_url}/checkin" style="display:inline-block;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;padding:15px 36px;letter-spacing:0.02em;">
+                        <a href="{app_url}/checkin" style="display:inline-block;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;padding:15px 36px;letter-spacing:0.02em;font-family:{font};">
                           Faire mon check-in &rarr;
                         </a>
                       </td>

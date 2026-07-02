@@ -83,13 +83,13 @@ export default function Dashboard() {
     <div className="min-h-screen bg-navy-950 flex">
       <Sidebar isPremium={isPremium} />
 
-      <main className="ml-[210px] flex-1 px-8 py-8 max-w-3xl">
+      <main className="md:ml-[210px] flex-1 px-4 md:px-8 py-6 md:py-8 max-w-3xl pb-24 md:pb-8">
         {/* Header */}
         <div className="mb-6">
           <p className="text-xs text-slate-500 mb-1">
             {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
           </p>
-          <h1 className="text-3xl font-bold text-white">
+          <h1 className="text-2xl md:text-3xl font-bold text-white">
             {getGreeting()}, {firstName} 🌿
           </h1>
           <p className="text-sm text-slate-400 mt-1">
@@ -212,7 +212,7 @@ export default function Dashboard() {
         </div>
       </main>
 
-      <button className="fixed bottom-5 right-5 w-9 h-9 rounded-full bg-navy-800 border border-navy-700 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+      <button className="fixed bottom-20 md:bottom-5 right-5 w-9 h-9 rounded-full bg-navy-800 border border-navy-700 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
         <HelpCircle size={16} />
       </button>
     </div>

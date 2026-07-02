@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@clerk/clerk-react'
 import Landing from './pages/Landing'
 import Onboarding from './pages/Onboarding'
@@ -9,6 +9,9 @@ import Journal from './pages/Journal'
 import Protocols from './pages/Protocols'
 import Insights from './pages/Insights'
 import Profile from './pages/Profile'
+import BottomNav from './components/BottomNav'
+
+const PROTECTED_PATHS = ['/dashboard', '/checkin', '/journal', '/protocols', '/insights', '/profile']
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isSignedIn, isLoaded } = useAuth()
@@ -17,9 +20,12 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
-export default function App() {
+function AppLayout() {
+  const location = useLocation()
+  const showBottomNav = PROTECTED_PATHS.some(p => location.pathname.startsWith(p))
+
   return (
-    <BrowserRouter>
+    <>
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/onboarding" element={<Onboarding />} />
@@ -32,6 +38,15 @@ export default function App() {
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      {showBottomNav && <BottomNav />}
+    </>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppLayout />
     </BrowserRouter>
   )
 }

@@ -99,7 +99,7 @@ export default function CheckIn() {
     return (
       <div className="min-h-screen bg-navy-950 flex">
         <Sidebar />
-        <main className="ml-[210px] flex-1 px-8 py-8 max-w-lg">
+        <main className="md:ml-[210px] flex-1 px-4 md:px-8 py-6 md:py-8 max-w-lg pb-24 md:pb-8">
           {/* Success */}
           <div className="text-center py-8 mb-8">
             <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto mb-4">
@@ -155,7 +155,7 @@ export default function CheckIn() {
     <div className="min-h-screen bg-navy-950 flex">
       <Sidebar />
 
-      <main className="ml-[210px] flex-1 px-8 py-8 max-w-2xl">
+      <main className="md:ml-[210px] flex-1 px-4 md:px-8 py-6 md:py-8 max-w-2xl pb-24 md:pb-8">
         <div className="grid grid-cols-[1fr_260px] gap-6">
           {/* Left: form */}
           <div>

@@ -41,7 +41,7 @@ export default function Sidebar({ trialDaysLeft = 5 }: SidebarProps) {
   }
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-[210px] flex flex-col border-r border-navy-700 bg-navy-900 z-30">
+    <aside className="hidden md:flex fixed left-0 top-0 h-screen w-[210px] flex-col border-r border-navy-700 bg-navy-900 z-30">
       {/* Logo */}
       <div className="flex items-center justify-between px-4 py-4 border-b border-navy-700">
         <div className="flex items-center gap-2">
