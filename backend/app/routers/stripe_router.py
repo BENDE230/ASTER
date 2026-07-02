@@ -36,8 +36,8 @@ async def create_checkout(
         payment_method_types=["card"],
         line_items=[{"price": settings.stripe_price_id, "quantity": 1}],
         mode="subscription",
-        success_url="https://aster-ambre.vercel.app/dashboard?upgraded=true",
-        cancel_url="https://aster-ambre.vercel.app/dashboard",
+        success_url="https://aster-amber.vercel.app/dashboard?upgraded=true",
+        cancel_url="https://aster-amber.vercel.app/dashboard",
         client_reference_id=user_id,
         customer_email=user.email,
     )
