@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useUser, useClerk } from '@clerk/clerk-react'
-import { Home, CheckCircle, BookOpen, Shield, Sparkles, Moon, Zap, LogOut, X } from 'lucide-react'
+import { Home, CheckCircle, BookOpen, Shield, Sparkles, Moon, Zap, LogOut, X, UserCircle } from 'lucide-react'
 import { useApi } from '../hooks/useApi'
 import { usePremium } from '../hooks/usePremium'
 
@@ -11,6 +11,7 @@ const NAV = [
   { to: '/journal',    label: 'Journal',    icon: BookOpen },
   { to: '/protocols',  label: 'Protocoles', icon: Shield },
   { to: '/insights',   label: 'Insights',   icon: Sparkles },
+  { to: '/profile',    label: 'Profil',     icon: UserCircle },
 ]
 
 interface SidebarProps {
@@ -49,9 +50,12 @@ export default function Sidebar({ trialDaysLeft = 5 }: SidebarProps) {
           </div>
           <span className="font-semibold tracking-wide text-sm">ASTER</span>
         </div>
-        <div className="w-7 h-7 rounded-full bg-navy-700 flex items-center justify-center text-xs font-semibold text-slate-300">
-          {initials}
-        </div>
+        <NavLink to="/profile" className="w-7 h-7 rounded-full bg-navy-700 flex items-center justify-center text-xs font-semibold text-slate-300 hover:bg-navy-600 transition-colors" title="Mon profil">
+          {user?.imageUrl
+            ? <img src={user.imageUrl} alt="avatar" className="w-7 h-7 rounded-full object-cover" />
+            : initials
+          }
+        </NavLink>
       </div>
 
       {/* Nav */}

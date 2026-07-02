@@ -12,6 +12,9 @@ class User(Base):
     last_name = Column(String, nullable=True)
     is_premium = Column(Boolean, default=False)
     trial_ends_at = Column(DateTime, nullable=True)
+    stripe_customer_id = Column(String, nullable=True)
+    subscription_plan = Column(String, nullable=True)   # 'monthly' | 'yearly'
+    subscription_ends_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
 
     checkins = relationship("CheckIn", back_populates="user", cascade="all, delete-orphan")

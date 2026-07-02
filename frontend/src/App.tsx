@@ -8,6 +8,7 @@ import CheckIn from './pages/CheckIn'
 import Journal from './pages/Journal'
 import Protocols from './pages/Protocols'
 import Insights from './pages/Insights'
+import Profile from './pages/Profile'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isSignedIn, isLoaded } = useAuth()
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/journal" element={<ProtectedRoute><Journal /></ProtectedRoute>} />
         <Route path="/protocols" element={<ProtectedRoute><Protocols /></ProtectedRoute>} />
         <Route path="/insights" element={<ProtectedRoute><Insights /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

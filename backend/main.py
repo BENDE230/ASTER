@@ -8,6 +8,29 @@ from app.routers import ai
 
 Base.metadata.create_all(bind=engine)
 
+# Safe column additions for existing deployments
+from sqlalchemy import text
+from app.database import SessionLocal
+
+def run_migrations():
+    db = SessionLocal()
+    try:
+        migrations = [
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_customer_id VARCHAR",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_plan VARCHAR",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_ends_at TIMESTAMP",
+        ]
+        for sql in migrations:
+            try:
+                db.execute(text(sql))
+            except Exception:
+                pass
+        db.commit()
+    finally:
+        db.close()
+
+run_migrations()
+
 app = FastAPI(title="ASTER API", version="0.1.0")
 
 origins = settings.allowed_origins.split(",")
