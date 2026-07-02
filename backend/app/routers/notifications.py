@@ -183,25 +183,26 @@ async def send_daily_reminders(
 
     return {"sent": sent, "errors": errors}
 
+class TestEmailRequest(BaseModel):
+    email: str
+
 @router.post("/test-email")
 async def send_test_email(
+    body: TestEmailRequest,
     db: Session = Depends(get_db),
     user_id: str = Depends(get_current_user_id),
 ):
     """Send a test notification to the current user."""
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user or not user.notification_email:
-        raise HTTPException(status_code=400, detail="Aucun email de notification configuré")
-
     if not settings.resend_api_key:
-        raise HTTPException(status_code=503, detail="Service email non configuré")
+        raise HTTPException(status_code=503, detail="Service email non configuré (RESEND_API_KEY manquant)")
 
     resend.api_key = settings.resend_api_key
-    first_name = (user.first_name or "").strip()
+    user = db.query(User).filter(User.id == user_id).first()
+    first_name = (user.first_name or "").strip() if user else ""
     try:
         resend.Emails.send({
-            "from": "ASTER <onboarding@resend.dev>",
-            "to": [user.notification_email],
+            "from": "onboarding@resend.dev",
+            "to": [body.email],
             "subject": "Test — Ton check-in du jour ✦ ASTER",
             "html": get_email_html(first_name, settings.app_url),
         })
