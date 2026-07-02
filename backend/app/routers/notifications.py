@@ -7,7 +7,6 @@ import resend
 from ..database import get_db
 from ..auth import get_current_user_id
 from ..config import settings
-from ..models.user import User
 
 router = APIRouter(prefix="/api/notifications", tags=["notifications"])
 
@@ -108,13 +107,16 @@ async def get_settings(
     db: Session = Depends(get_db),
     user_id: str = Depends(get_current_user_id),
 ):
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
+    row = db.execute(
+        text("SELECT notifications_enabled, notification_hour, notification_email FROM users WHERE id = :id"),
+        {"id": user_id}
+    ).fetchone()
+    if not row:
         return {"enabled": False, "hour": 9, "email": None}
     return {
-        "enabled": user.notifications_enabled or False,
-        "hour": user.notification_hour or 9,
-        "email": user.notification_email,
+        "enabled": bool(row[0]) if row[0] is not None else False,
+        "hour": row[1] if row[1] is not None else 9,
+        "email": row[2],
     }
 
 @router.patch("/settings")
@@ -123,14 +125,17 @@ async def update_settings(
     db: Session = Depends(get_db),
     user_id: str = Depends(get_current_user_id),
 ):
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="Utilisateur introuvable")
-
-    user.notifications_enabled = body.enabled
-    user.notification_hour = max(0, min(23, body.hour))
-    if body.email:
-        user.notification_email = body.email
+    hour = max(0, min(23, body.hour))
+    db.execute(
+        text("""
+            UPDATE users
+            SET notifications_enabled = :enabled,
+                notification_hour = :hour,
+                notification_email = :email
+            WHERE id = :id
+        """),
+        {"enabled": body.enabled, "hour": hour, "email": body.email, "id": user_id}
+    )
     db.commit()
     return {"ok": True}
 
@@ -197,8 +202,8 @@ async def send_test_email(
         raise HTTPException(status_code=503, detail="Service email non configuré (RESEND_API_KEY manquant)")
 
     resend.api_key = settings.resend_api_key
-    user = db.query(User).filter(User.id == user_id).first()
-    first_name = (user.first_name or "").strip() if user else ""
+    row = db.execute(text("SELECT notification_email FROM users WHERE id = :id"), {"id": user_id}).fetchone()
+    first_name = ""
     try:
         resend.Emails.send({
             "from": "onboarding@resend.dev",
