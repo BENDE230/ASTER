@@ -9,6 +9,20 @@ from ..models.user import User
 router = APIRouter(prefix="/api/stripe", tags=["stripe"])
 stripe.api_key = settings.stripe_secret_key
 
+@router.post("/activate-premium")
+async def activate_premium(
+    db: Session = Depends(get_db),
+    user_id: str = Depends(get_current_user_id),
+):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        user = User(id=user_id, email="", is_premium=True)
+        db.add(user)
+    else:
+        user.is_premium = True
+    db.commit()
+    return {"status": "ok", "is_premium": True}
+
 @router.post("/create-checkout")
 async def create_checkout(
     db: Session = Depends(get_db),

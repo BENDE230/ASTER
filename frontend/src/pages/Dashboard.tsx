@@ -31,11 +31,19 @@ function getGreeting() {
 export default function Dashboard() {
   const navigate = useNavigate()
   const { user } = useUser()
-  const { get } = useApi()
+  const { get, post } = useApi()
   const firstName = user?.firstName ?? 'toi'
 
   const [stats, setStats] = useState<Stats>({ streak: 0, total_this_month: 0, week: [] })
   const [checkedInToday, setCheckedInToday] = useState(false)
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('upgraded') === 'true') {
+      post('/api/stripe/activate-premium', {}).catch(() => {})
+      window.history.replaceState({}, '', '/dashboard')
+    }
+  }, [])
 
   const fetchStats = () => {
     get<Stats>('/api/checkins/stats')
