@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import { useUser, useClerk } from '@clerk/clerk-react'
 import { Home, CheckCircle, BookOpen, Shield, Sparkles, Moon, Zap, LogOut } from 'lucide-react'
+import { useApi } from '../hooks/useApi'
 
 const NAV = [
   { to: '/dashboard',  label: 'Accueil',    icon: Home },
@@ -18,7 +19,17 @@ interface SidebarProps {
 export default function Sidebar({ trialDaysLeft = 5, isPremium = false }: SidebarProps) {
   const { user } = useUser()
   const { signOut } = useClerk()
+  const { post } = useApi()
   const initials = user ? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase() : 'U'
+
+  const handleUpgrade = async () => {
+    try {
+      const data = await post('/api/stripe/create-checkout', {})
+      if (data?.url) window.location.href = data.url
+    } catch {
+      alert('Erreur lors de la création du paiement.')
+    }
+  }
 
   return (
     <aside className="fixed left-0 top-0 h-screen w-[210px] flex flex-col border-r border-navy-700 bg-navy-900 z-30">
@@ -61,7 +72,10 @@ export default function Sidebar({ trialDaysLeft = 5, isPremium = false }: Sideba
           <div className="rounded-xl border border-navy-600 bg-navy-800 p-3 space-y-2">
             <p className="text-xs font-semibold text-slate-300">Essai gratuit</p>
             <p className="text-xs text-slate-500">Il reste <span className="font-semibold text-white">{trialDaysLeft} jours</span></p>
-            <button className="w-full h-8 rounded-lg bg-periwinkle-500 hover:bg-periwinkle-400 text-white text-xs font-semibold transition-colors">
+            <button
+              onClick={handleUpgrade}
+              className="w-full h-8 rounded-lg bg-periwinkle-500 hover:bg-periwinkle-400 text-white text-xs font-semibold transition-colors"
+            >
               Passer à Premium
             </button>
           </div>
