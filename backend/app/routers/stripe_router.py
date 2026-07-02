@@ -1,6 +1,7 @@
 import stripe
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from ..database import get_db
 from ..auth import get_current_user_id
 from ..config import settings
@@ -67,14 +68,16 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
             session_obj = event.get("data", {}).get("object", {})
             user_id = session_obj.get("client_reference_id")
             if user_id:
-                user = db.query(User).filter(User.id == user_id).first()
-                if not user:
-                    user = User(id=user_id, email="", is_premium=True)
-                    db.add(user)
-                else:
-                    user.is_premium = True
+                db.execute(
+                    text("""
+                        INSERT INTO users (id, email, is_premium, created_at)
+                        VALUES (:id, :email, TRUE, NOW())
+                        ON CONFLICT (id) DO UPDATE SET is_premium = TRUE
+                    """),
+                    {"id": user_id, "email": f"stripe-{user_id}@aster.app"}
+                )
                 db.commit()
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"DB error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"DB error [{type(e).__name__}]: {str(e)}")
 
     return {"status": "ok"}
