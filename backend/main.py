@@ -16,22 +16,23 @@ from app.database import SessionLocal
 def run_migrations():
     db = SessionLocal()
     try:
+        # SQLite-compatible: no IF NOT EXISTS, catch duplicate column errors silently
         migrations = [
-            "ALTER TABLE users ADD COLUMN IF NOT EXISTS first_name VARCHAR",
-            "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_name VARCHAR",
-            "ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_customer_id VARCHAR",
-            "ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_plan VARCHAR",
-            "ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_ends_at TIMESTAMP",
-            "ALTER TABLE users ADD COLUMN IF NOT EXISTS notifications_enabled BOOLEAN DEFAULT FALSE",
-            "ALTER TABLE users ADD COLUMN IF NOT EXISTS notification_hour INTEGER DEFAULT 9",
-            "ALTER TABLE users ADD COLUMN IF NOT EXISTS notification_email VARCHAR",
+            "ALTER TABLE users ADD COLUMN first_name VARCHAR",
+            "ALTER TABLE users ADD COLUMN last_name VARCHAR",
+            "ALTER TABLE users ADD COLUMN stripe_customer_id VARCHAR",
+            "ALTER TABLE users ADD COLUMN subscription_plan VARCHAR",
+            "ALTER TABLE users ADD COLUMN subscription_ends_at TIMESTAMP",
+            "ALTER TABLE users ADD COLUMN notifications_enabled BOOLEAN DEFAULT 0",
+            "ALTER TABLE users ADD COLUMN notification_hour INTEGER DEFAULT 9",
+            "ALTER TABLE users ADD COLUMN notification_email VARCHAR",
         ]
         for sql in migrations:
             try:
                 db.execute(text(sql))
+                db.commit()
             except Exception:
-                pass
-        db.commit()
+                db.rollback()
     finally:
         db.close()
 
