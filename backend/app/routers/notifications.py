@@ -172,7 +172,7 @@ async def send_daily_reminders(
         try:
             first_name = (user.first_name or "").strip()
             resend.Emails.send({
-                "from": "ASTER <rappels@aster-app.fr>",
+                "from": "ASTER <onboarding@resend.dev>",
                 "to": [user.notification_email],
                 "subject": "Ton check-in du jour ✦ ASTER",
                 "html": get_email_html(first_name, settings.app_url),
@@ -200,7 +200,7 @@ async def send_test_email(
     first_name = (user.first_name or "").strip()
     try:
         resend.Emails.send({
-            "from": "ASTER <rappels@aster-app.fr>",
+            "from": "ASTER <onboarding@resend.dev>",
             "to": [user.notification_email],
             "subject": "Test — Ton check-in du jour ✦ ASTER",
             "html": get_email_html(first_name, settings.app_url),
