@@ -90,22 +90,42 @@ async def checkin_stats(
         elif i > 0:
             break
 
-    # Weekly data
+    # Weekly data with dominant feeling per day
     week_data = []
     for i in range(6, -1, -1):
         day = today - timedelta(days=i)
-        count = (
-            db.query(func.count(CheckIn.id))
+        day_checkins = (
+            db.query(CheckIn.feeling)
             .filter(
                 CheckIn.user_id == user_id,
                 func.date(CheckIn.created_at) == day.isoformat(),
             )
-            .scalar()
-        ) or 0
-        week_data.append({"date": str(day), "calm_avg": 5.0 if count > 0 else None})
+            .all()
+        )
+        feelings = [c.feeling for c in day_checkins]
+        dominant = max(set(feelings), key=feelings.count) if feelings else None
+        week_data.append({
+            "date": str(day),
+            "calm_avg": 5.0 if feelings else None,
+            "count": len(feelings),
+            "feeling": dominant,
+        })
+
+    # Recent check-ins (last 10)
+    recent = (
+        db.query(CheckIn)
+        .filter(CheckIn.user_id == user_id)
+        .order_by(CheckIn.created_at.desc())
+        .limit(10)
+        .all()
+    )
 
     return {
         "streak": streak,
         "total_this_month": total_this_month,
         "week": week_data,
+        "recent": [
+            {"id": c.id, "feeling": c.feeling, "created_at": c.created_at.isoformat()}
+            for c in recent
+        ],
     }

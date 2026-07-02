@@ -17,7 +17,17 @@ const DAYS = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di']
 interface Stats {
   streak: number
   total_this_month: number
-  week: { date: string; calm_avg: number | null }[]
+  week: { date: string; calm_avg: number | null; count: number; feeling: string | null }[]
+  recent: { id: number; feeling: string; created_at: string }[]
+}
+
+const FEELING_ICON: Record<string, string> = {
+  'Je suranalyse':      '⏱',
+  'Je suis figé·e':    '○',
+  'Je suis vidé·e':    '≈',
+  'Hypervigilance':    '⚠',
+  'Je me sens trop':   '♡',
+  'Saturation mentale':'⚡',
 }
 
 function getGreeting() {
@@ -34,7 +44,7 @@ export default function Dashboard() {
   const { get, post } = useApi()
   const firstName = user?.firstName ?? 'toi'
 
-  const [stats, setStats] = useState<Stats>({ streak: 0, total_this_month: 0, week: [] })
+  const [stats, setStats] = useState<Stats>({ streak: 0, total_this_month: 0, week: [], recent: [] })
   const [checkedInToday, setCheckedInToday] = useState(false)
   const [isPremium, setIsPremium] = useState(false)
 
@@ -129,13 +139,12 @@ export default function Dashboard() {
           <div className="flex items-end gap-2 h-14">
             {DAYS.map((day, i) => {
               const dayData = stats.week[i]
-              const height = dayData?.calm_avg ? (dayData.calm_avg / 10) : 0.05
-              const hasData = dayData?.calm_avg !== null && dayData?.calm_avg !== undefined
+              const hasData = dayData?.count > 0
               return (
-                <div key={day} className="flex-1 flex flex-col items-center gap-1">
+                <div key={day} className="flex-1 flex flex-col items-center gap-1" title={dayData?.feeling ?? ''}>
                   <div
                     className={`w-full rounded-sm transition-all ${hasData ? 'bg-periwinkle-500' : 'bg-navy-700'}`}
-                    style={{ height: `${height * 100}%`, minHeight: '4px' }}
+                    style={{ height: hasData ? '100%' : '8%', minHeight: '4px' }}
                   />
                   <span className="text-xs text-slate-600">{day}</span>
                 </div>
@@ -182,21 +191,22 @@ export default function Dashboard() {
         <div>
           <p className="section-title mb-3">Activité récente</p>
           <div className="space-y-2">
-            {stats.week.filter(d => d.calm_avg !== null).length === 0 ? (
+            {!stats.recent?.length ? (
               <p className="text-sm text-slate-500 italic px-1">Aucune activité pour l'instant. Fais ton premier check-in !</p>
             ) : (
-              stats.week
-                .filter(d => d.calm_avg !== null)
-                .slice(0, 3)
-                .map(d => (
-                  <div key={d.date} className="flex items-center gap-3 px-4 py-3 rounded-xl border border-navy-700 bg-navy-800">
-                    <Clock size={14} className="text-slate-500 flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-slate-200">Check-in émotionnel complété</p>
-                      <p className="text-xs text-slate-500">{new Date(d.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
-                    </div>
+              stats.recent.slice(0, 4).map(c => (
+                <div key={c.id} className="flex items-center gap-3 px-4 py-3 rounded-xl border border-navy-700 bg-navy-800">
+                  <span className="text-base flex-shrink-0">{FEELING_ICON[c.feeling] ?? '·'}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-slate-200">{c.feeling}</p>
+                    <p className="text-xs text-slate-500">{new Date(c.created_at).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
                   </div>
-                ))
+                  <span className="text-xs text-slate-600 flex-shrink-0 flex items-center gap-1">
+                    <Clock size={10} />
+                    {new Date(c.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+              ))
             )}
           </div>
         </div>
