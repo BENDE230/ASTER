@@ -1,13 +1,8 @@
-import { useState } from 'react'
-import { Lock, HelpCircle, Sparkles, BookOpen, Brain } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Lock, HelpCircle, Sparkles, BookOpen, Brain, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
 import { useApi } from '../hooks/useApi'
 import { usePremium } from '../hooks/usePremium'
-
-interface Entry {
-  date: string
-  content: string
-}
 
 interface AiAnalysis {
   emotion: string
@@ -16,36 +11,188 @@ interface AiAnalysis {
   exercice: string
 }
 
-const SAMPLE_ENTRIES: Entry[] = [
-  {
-    date: 'Hier · 22h03',
-    content: "Je me suis senti·e submergé·e lors de la réunion. Trop de bruit, trop de demandes simultanées...",
-  },
-]
+interface Entry {
+  id: number
+  content: string
+  created_at: string
+  ai_analysis: AiAnalysis | null
+}
+
+function formatDate(iso: string) {
+  const d = new Date(iso)
+  return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
+    + ' · ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+}
+
+function EntryCard({
+  entry,
+  isPremium,
+  onDelete,
+  onAnalyzed,
+}: {
+  entry: Entry
+  isPremium: boolean
+  onDelete: (id: number) => void
+  onAnalyzed: (id: number, analysis: AiAnalysis) => void
+}) {
+  const [expanded, setExpanded] = useState(false)
+  const [analyzing, setAnalyzing] = useState(false)
+  const { post, patch, delete: del } = useApi()
+
+  const handleAnalyze = async () => {
+    if (!isPremium) return
+    setAnalyzing(true)
+    try {
+      const result = await post<AiAnalysis>('/api/ai/analyze-journal', { content: entry.content })
+      await patch(`/api/journal/${entry.id}/analysis`, { analysis: result })
+      onAnalyzed(entry.id, result)
+    } catch {
+      // silent fail
+    } finally {
+      setAnalyzing(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!confirm('Supprimer cette entrée ?')) return
+    try {
+      await del(`/api/journal/${entry.id}`)
+      onDelete(entry.id)
+    } catch {
+      // silent fail
+    }
+  }
+
+  return (
+    <div className="rounded-xl border border-navy-700 bg-navy-800 overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-navy-700/60">
+        <div className="flex items-center gap-2 text-xs text-slate-500">
+          <BookOpen size={11} />
+          {formatDate(entry.created_at)}
+        </div>
+        <div className="flex items-center gap-1">
+          {isPremium && !entry.ai_analysis && (
+            <button
+              onClick={handleAnalyze}
+              disabled={analyzing}
+              className="flex items-center gap-1 px-2 py-1 rounded text-xs text-periwinkle-400 hover:bg-periwinkle-500/10 transition-colors disabled:opacity-50"
+            >
+              {analyzing ? (
+                <svg className="animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+              ) : <Sparkles size={11} />}
+              Analyser
+            </button>
+          )}
+          <button
+            onClick={handleDelete}
+            className="p-1 rounded text-slate-600 hover:text-red-400 transition-colors"
+          >
+            <Trash2 size={12} />
+          </button>
+          <button
+            onClick={() => setExpanded(e => !e)}
+            className="p-1 rounded text-slate-500 hover:text-white transition-colors"
+          >
+            {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          </button>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="px-4 py-3">
+        <p className={`text-sm text-slate-300 leading-relaxed ${expanded ? '' : 'line-clamp-2'}`}>
+          {entry.content}
+        </p>
+      </div>
+
+      {/* AI Analysis */}
+      {entry.ai_analysis && (
+        <div className="px-4 pb-4">
+          <div className="rounded-lg bg-periwinkle-500/5 border border-periwinkle-500/20 px-3 py-3">
+            <div className="flex items-center gap-1.5 mb-2">
+              <Brain size={12} className="text-periwinkle-400" />
+              <span className="text-xs font-semibold text-periwinkle-400">Analyse IA</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 mb-2">
+              <div>
+                <p className="text-xs text-slate-600">Émotion</p>
+                <p className="text-xs font-medium text-slate-300">{entry.ai_analysis.emotion}</p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-600">Besoin</p>
+                <p className="text-xs font-medium text-slate-300">{entry.ai_analysis.besoin}</p>
+              </div>
+            </div>
+            <p className="text-xs text-slate-400 italic leading-relaxed">"{entry.ai_analysis.reformulation}"</p>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function Journal() {
   const [content, setContent] = useState('')
   const [saved, setSaved] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [entries, setEntries] = useState<Entry[]>([])
+  const [loadingEntries, setLoadingEntries] = useState(true)
+  const [newEntryId, setNewEntryId] = useState<number | null>(null)
+
+  // For new entry analysis
   const [analysis, setAnalysis] = useState<AiAnalysis | null>(null)
   const [analyzing, setAnalyzing] = useState(false)
   const [analyzeError, setAnalyzeError] = useState('')
-  const { post } = useApi()
+
+  const { get, post, patch } = useApi()
   const isPremium = usePremium()
 
   const today = new Date().toLocaleDateString('fr-FR', {
     weekday: 'long', day: 'numeric', month: 'long',
   }) + ' · ' + new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
 
+  useEffect(() => {
+    const load = async () => {
+      setLoadingEntries(true)
+      try {
+        const data = await get<{ entries: Entry[]; is_premium: boolean }>('/api/journal')
+        setEntries(data.entries)
+      } catch {
+        // fallback: load from localStorage
+        const local = JSON.parse(localStorage.getItem('aster_journal') ?? '[]')
+        setEntries(local.map((e: { content: string; date: string }, i: number) => ({
+          id: -(i + 1),
+          content: e.content,
+          created_at: e.date,
+          ai_analysis: null,
+        })))
+      } finally {
+        setLoadingEntries(false)
+      }
+    }
+    load()
+  }, [])
+
   const handleSave = async () => {
     if (!content.trim()) return
     setSaving(true)
     try {
-      await post('/api/journal', { content })
+      const result = await post<{ id: number; created_at: string }>('/api/journal', { content })
+      const newEntry: Entry = { id: result.id, content, created_at: result.created_at, ai_analysis: null }
+      setEntries(prev => [newEntry, ...prev])
+      setNewEntryId(result.id)
+      setContent('')
+      setAnalysis(null)
     } catch {
+      // fallback to localStorage
       const prev = JSON.parse(localStorage.getItem('aster_journal') ?? '[]')
       prev.unshift({ date: new Date().toISOString(), content })
       localStorage.setItem('aster_journal', JSON.stringify(prev.slice(0, 50)))
+      setContent('')
     } finally {
       setSaving(false)
     }
@@ -66,6 +213,14 @@ export default function Journal() {
     } finally {
       setAnalyzing(false)
     }
+  }
+
+  const handleDelete = (id: number) => {
+    setEntries(prev => prev.filter(e => e.id !== id))
+  }
+
+  const handleAnalyzed = (id: number, a: AiAnalysis) => {
+    setEntries(prev => prev.map(e => e.id === id ? { ...e, ai_analysis: a } : e))
   }
 
   return (
@@ -125,7 +280,7 @@ export default function Journal() {
           </button>
         </div>
 
-        {/* AI Analysis Result */}
+        {/* AI Analysis Result (before saving) */}
         {analysis && (
           <div className="rounded-xl border border-periwinkle-500/30 bg-periwinkle-500/5 px-5 py-4 mb-5 space-y-3">
             <div className="flex items-center gap-2 mb-2">
@@ -157,7 +312,7 @@ export default function Journal() {
           <p className="text-sm text-red-400 mb-4">{analyzeError}</p>
         )}
 
-        {/* Premium AI upsell card */}
+        {/* Premium upsell */}
         {!isPremium && (
           <div className="flex items-center justify-between rounded-xl border border-amber-500/20 bg-navy-800 px-5 py-4 mb-6">
             <div className="flex items-start gap-3">
@@ -165,8 +320,7 @@ export default function Journal() {
               <div>
                 <p className="text-sm font-semibold text-slate-200">Analyse IA disponible en Premium</p>
                 <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-                  Détection de l'émotion dominante, du besoin émotionnel, reformulation bienveillante
-                  et exercice recommandé — disponible en Premium.
+                  Émotion dominante, besoin émotionnel, reformulation bienveillante et exercice recommandé.
                 </p>
               </div>
             </div>
@@ -176,35 +330,57 @@ export default function Journal() {
           </div>
         )}
 
-        {/* Previous entries */}
+        {/* History */}
         <div>
-          <p className="section-title mb-3">
-            Entrées précédentes{' '}
-            <span className="text-slate-600 normal-case tracking-normal font-normal">
-              (historique complet en Premium)
-            </span>
-          </p>
-          <div className="space-y-2">
-            {SAMPLE_ENTRIES.map((entry, i) => (
-              <div key={i} className="rounded-xl border border-navy-700 bg-navy-800 px-4 py-3">
-                <div className="flex items-center gap-2 text-xs text-slate-500 mb-1">
-                  <BookOpen size={11} />
-                  {entry.date}
-                </div>
-                <p className="text-sm text-slate-300 leading-relaxed">{entry.content}</p>
-              </div>
-            ))}
-
-            {!isPremium && (
-              <button className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-navy-700 bg-navy-800/50 hover:bg-navy-800 transition-colors">
-                <div className="flex items-center gap-2 text-xs text-slate-500">
-                  <Lock size={12} />
-                  2 entrées supplémentaires · Débloquer l'historique complet
-                </div>
-                <span className="text-slate-600 text-sm">›</span>
-              </button>
+          <div className="flex items-center justify-between mb-3">
+            <p className="section-title">
+              Entrées précédentes
+              {!isPremium && (
+                <span className="text-slate-600 normal-case tracking-normal font-normal ml-1">
+                  (historique complet en Premium)
+                </span>
+              )}
+            </p>
+            {!loadingEntries && (
+              <span className="text-xs text-slate-600">{entries.length} entrée{entries.length > 1 ? 's' : ''}</span>
             )}
           </div>
+
+          {loadingEntries ? (
+            <div className="space-y-2">
+              {[1, 2].map(i => (
+                <div key={i} className="rounded-xl border border-navy-700 bg-navy-800 h-20 animate-pulse" />
+              ))}
+            </div>
+          ) : entries.length === 0 ? (
+            <div className="rounded-xl border border-navy-700 bg-navy-800/50 px-4 py-6 text-center">
+              <BookOpen size={20} className="text-slate-600 mx-auto mb-2" />
+              <p className="text-sm text-slate-500">Aucune entrée pour l'instant.</p>
+              <p className="text-xs text-slate-600 mt-1">Écris ta première pensée ci-dessus.</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {entries.map(entry => (
+                <EntryCard
+                  key={entry.id}
+                  entry={entry}
+                  isPremium={isPremium}
+                  onDelete={handleDelete}
+                  onAnalyzed={handleAnalyzed}
+                />
+              ))}
+
+              {!isPremium && entries.length >= 1 && (
+                <button className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-navy-700 bg-navy-800/50 hover:bg-navy-800 transition-colors">
+                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                    <Lock size={12} />
+                    Historique complet · Débloquer en Premium
+                  </div>
+                  <span className="text-slate-600 text-sm">›</span>
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </main>
 
