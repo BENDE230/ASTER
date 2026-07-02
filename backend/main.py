@@ -17,6 +17,8 @@ def run_migrations():
     db = SessionLocal()
     try:
         migrations = [
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS first_name VARCHAR",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_name VARCHAR",
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_customer_id VARCHAR",
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_plan VARCHAR",
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_ends_at TIMESTAMP",
