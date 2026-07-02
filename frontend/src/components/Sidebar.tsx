@@ -24,7 +24,7 @@ export default function Sidebar({ trialDaysLeft = 5, isPremium = false }: Sideba
 
   const handleUpgrade = async () => {
     try {
-      const data = await post('/api/stripe/create-checkout', {})
+      const data = await post<{ url: string }>('/api/stripe/create-checkout', {})
       if (data?.url) window.location.href = data.url
     } catch {
       alert('Erreur lors de la création du paiement.')
