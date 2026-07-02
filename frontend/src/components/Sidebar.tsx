@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom'
 import { useUser, useClerk } from '@clerk/clerk-react'
 import { Home, CheckCircle, BookOpen, Shield, Sparkles, Moon, Zap, LogOut } from 'lucide-react'
 import { useApi } from '../hooks/useApi'
-import { useEffect, useState } from 'react'
+import { usePremium } from '../hooks/usePremium'
 
 const NAV = [
   { to: '/dashboard',  label: 'Accueil',    icon: Home },
@@ -17,18 +17,12 @@ interface SidebarProps {
   isPremium?: boolean
 }
 
-export default function Sidebar({ trialDaysLeft = 5, isPremium: isPremiumProp = false }: SidebarProps) {
+export default function Sidebar({ trialDaysLeft = 5 }: SidebarProps) {
   const { user } = useUser()
   const { signOut } = useClerk()
-  const { post, get } = useApi()
+  const { post } = useApi()
+  const isPremium = usePremium()
   const initials = user ? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase() : 'U'
-  const [isPremium, setIsPremium] = useState(isPremiumProp)
-
-  useEffect(() => {
-    get<{ is_premium: boolean }>('/api/stripe/user-status')
-      .then(data => { if (data?.is_premium) setIsPremium(true) })
-      .catch(() => {})
-  }, [])
 
   const handleUpgrade = async () => {
     try {
