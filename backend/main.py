@@ -4,6 +4,7 @@ from app.config import settings
 from app.database import Base, engine
 from app.routers import onboarding, checkin, journal, insights
 from app.routers import stripe_router
+from app.routers import ai
 
 Base.metadata.create_all(bind=engine)
 
@@ -23,6 +24,7 @@ app.include_router(checkin.router)
 app.include_router(journal.router)
 app.include_router(insights.router)
 app.include_router(stripe_router.router)
+app.include_router(ai.router)
 
 @app.get("/health")
 def health():

@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     stripe_price_id: str = ""
     stripe_price_id_yearly: str = ""
     stripe_webhook_secret: str = ""
+    openai_api_key: str = ""
 
     class Config:
         env_file = ".env"

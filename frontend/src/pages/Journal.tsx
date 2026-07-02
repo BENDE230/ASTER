@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { Lock, HelpCircle, Sparkles, BookOpen } from 'lucide-react'
+import { useState } from 'react'
+import { Lock, HelpCircle, Sparkles, BookOpen, Brain } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
 import { useApi } from '../hooks/useApi'
 import { usePremium } from '../hooks/usePremium'
@@ -7,6 +7,13 @@ import { usePremium } from '../hooks/usePremium'
 interface Entry {
   date: string
   content: string
+}
+
+interface AiAnalysis {
+  emotion: string
+  besoin: string
+  reformulation: string
+  exercice: string
 }
 
 const SAMPLE_ENTRIES: Entry[] = [
@@ -20,6 +27,9 @@ export default function Journal() {
   const [content, setContent] = useState('')
   const [saved, setSaved] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [analysis, setAnalysis] = useState<AiAnalysis | null>(null)
+  const [analyzing, setAnalyzing] = useState(false)
+  const [analyzeError, setAnalyzeError] = useState('')
   const { post } = useApi()
   const isPremium = usePremium()
 
@@ -41,6 +51,21 @@ export default function Journal() {
     }
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
+  }
+
+  const handleAnalyze = async () => {
+    if (!content.trim() || !isPremium) return
+    setAnalyzing(true)
+    setAnalyzeError('')
+    setAnalysis(null)
+    try {
+      const result = await post<AiAnalysis>('/api/ai/analyze-journal', { content })
+      setAnalysis(result)
+    } catch {
+      setAnalyzeError("Une erreur s'est produite. Réessaie dans un instant.")
+    } finally {
+      setAnalyzing(false)
+    }
   }
 
   return (
@@ -72,11 +97,24 @@ export default function Journal() {
         {/* Actions */}
         <div className="flex gap-3 mb-5">
           <button
-            disabled={!isPremium}
+            onClick={handleAnalyze}
+            disabled={!isPremium || !content.trim() || analyzing}
             className="flex items-center gap-2 px-4 h-10 rounded-lg border border-periwinkle-500/50 text-periwinkle-400 text-sm font-medium hover:bg-periwinkle-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Lock size={13} />
-            Analyser avec l'IA · Premium
+            {analyzing ? (
+              <>
+                <svg className="animate-spin h-3.5 w-3.5" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+                Analyse en cours...
+              </>
+            ) : (
+              <>
+                {isPremium ? <Sparkles size={13} /> : <Lock size={13} />}
+                Analyser avec l'IA{!isPremium && ' · Premium'}
+              </>
+            )}
           </button>
           <button
             onClick={handleSave}
@@ -87,7 +125,39 @@ export default function Journal() {
           </button>
         </div>
 
-        {/* Premium AI card */}
+        {/* AI Analysis Result */}
+        {analysis && (
+          <div className="rounded-xl border border-periwinkle-500/30 bg-periwinkle-500/5 px-5 py-4 mb-5 space-y-3">
+            <div className="flex items-center gap-2 mb-2">
+              <Brain size={15} className="text-periwinkle-400" />
+              <span className="text-sm font-semibold text-slate-200">Analyse de ton entrée</span>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-lg bg-navy-800 px-3 py-2.5">
+                <p className="text-xs text-slate-500 mb-0.5">Émotion détectée</p>
+                <p className="text-sm font-medium text-slate-200">{analysis.emotion}</p>
+              </div>
+              <div className="rounded-lg bg-navy-800 px-3 py-2.5">
+                <p className="text-xs text-slate-500 mb-0.5">Besoin sous-jacent</p>
+                <p className="text-sm font-medium text-slate-200">{analysis.besoin}</p>
+              </div>
+            </div>
+            <div className="rounded-lg bg-navy-800 px-3 py-2.5">
+              <p className="text-xs text-slate-500 mb-1">Reformulation bienveillante</p>
+              <p className="text-sm text-slate-300 leading-relaxed italic">"{analysis.reformulation}"</p>
+            </div>
+            <div className="rounded-lg bg-navy-800 px-3 py-2.5">
+              <p className="text-xs text-slate-500 mb-1">Exercice recommandé</p>
+              <p className="text-sm text-slate-300 leading-relaxed">{analysis.exercice}</p>
+            </div>
+          </div>
+        )}
+
+        {analyzeError && (
+          <p className="text-sm text-red-400 mb-4">{analyzeError}</p>
+        )}
+
+        {/* Premium AI upsell card */}
         {!isPremium && (
           <div className="flex items-center justify-between rounded-xl border border-amber-500/20 bg-navy-800 px-5 py-4 mb-6">
             <div className="flex items-start gap-3">
@@ -125,14 +195,15 @@ export default function Journal() {
               </div>
             ))}
 
-            {/* Locked */}
-            <button className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-navy-700 bg-navy-800/50 hover:bg-navy-800 transition-colors">
-              <div className="flex items-center gap-2 text-xs text-slate-500">
-                <Lock size={12} />
-                2 entrées supplémentaires · Débloquer l'historique complet
-              </div>
-              <span className="text-slate-600 text-sm">›</span>
-            </button>
+            {!isPremium && (
+              <button className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-navy-700 bg-navy-800/50 hover:bg-navy-800 transition-colors">
+                <div className="flex items-center gap-2 text-xs text-slate-500">
+                  <Lock size={12} />
+                  2 entrées supplémentaires · Débloquer l'historique complet
+                </div>
+                <span className="text-slate-600 text-sm">›</span>
+              </button>
+            )}
           </div>
         </div>
       </main>

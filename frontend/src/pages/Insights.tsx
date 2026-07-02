@@ -1,8 +1,10 @@
-import { Lock, HelpCircle, TrendingUp } from 'lucide-react'
+import { useState } from 'react'
+import { Lock, HelpCircle, TrendingUp, Sparkles } from 'lucide-react'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import Sidebar from '../components/Sidebar'
 import PremiumGate from '../components/PremiumGate'
 import { usePremium } from '../hooks/usePremium'
+import { useApi } from '../hooks/useApi'
 
 const DOMINANT_STATES = [
   { name: 'Rumination',       value: 38, color: '#9b9ff5' },
@@ -19,6 +21,26 @@ const PATTERNS = [
 
 export default function Insights() {
   const isPremium = usePremium()
+  const { post } = useApi()
+  const [weeklyNote, setWeeklyNote] = useState('')
+  const [loadingNote, setLoadingNote] = useState(false)
+
+  const generateWeeklyNote = async () => {
+    if (!isPremium) return
+    setLoadingNote(true)
+    try {
+      const entries = JSON.parse(localStorage.getItem('aster_journal') ?? '[]')
+        .slice(0, 7)
+        .map((e: { content: string }) => e.content)
+      const result = await post<{ note: string }>('/api/ai/weekly-note', { entries })
+      setWeeklyNote(result.note)
+    } catch {
+      setWeeklyNote("Impossible de générer la note. Réessaie dans un instant.")
+    } finally {
+      setLoadingNote(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-navy-950 flex">
       <Sidebar />
@@ -117,18 +139,46 @@ export default function Insights() {
         </div>
 
         {/* Weekly note — premium */}
-        <div className="flex items-center gap-3 rounded-xl border border-navy-700 bg-navy-800 px-5 py-4">
-          {!isPremium && <Lock size={14} className="text-amber-400 flex-shrink-0" />}
-          <div>
-            <p className={`text-xs font-semibold uppercase tracking-widest mb-0.5 ${isPremium ? 'text-periwinkle-400' : 'text-amber-400'}`}>
-              Note de la semaine {!isPremium && '· Premium'}
-            </p>
+        <div className="rounded-xl border border-navy-700 bg-navy-800 px-5 py-4">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              {!isPremium && <Lock size={14} className="text-amber-400 flex-shrink-0" />}
+              <p className={`text-xs font-semibold uppercase tracking-widest ${isPremium ? 'text-periwinkle-400' : 'text-amber-400'}`}>
+                Note de la semaine {!isPremium && '· Premium'}
+              </p>
+            </div>
+            {isPremium && !weeklyNote && (
+              <button
+                onClick={generateWeeklyNote}
+                disabled={loadingNote}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-periwinkle-500/10 border border-periwinkle-500/30 text-periwinkle-400 text-xs font-medium hover:bg-periwinkle-500/20 transition-colors disabled:opacity-50"
+              >
+                {loadingNote ? (
+                  <>
+                    <svg className="animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                    Génération...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={11} />
+                    Générer
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+          {weeklyNote ? (
+            <p className="text-sm text-slate-300 leading-relaxed">{weeklyNote}</p>
+          ) : (
             <p className="text-xs text-slate-500 leading-relaxed">
               {isPremium
-                ? 'Ta synthèse IA sera disponible chaque semaine selon tes entrées.'
+                ? "Clique sur Générer pour obtenir ta synthèse IA personnalisée de la semaine."
                 : "Une synthèse personnalisée de tes patterns, rédigée chaque semaine par l'IA — disponible en Premium."}
             </p>
-          </div>
+          )}
         </div>
       </main>
 
