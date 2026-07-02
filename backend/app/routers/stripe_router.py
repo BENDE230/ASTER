@@ -33,21 +33,21 @@ async def activate_premium(
 
 @router.post("/create-checkout")
 async def create_checkout(
+    plan: str = "monthly",
     db: Session = Depends(get_db),
     user_id: str = Depends(get_current_user_id),
 ):
     user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+    price_id = settings.stripe_price_id_yearly if plan == "yearly" else settings.stripe_price_id
 
     session = stripe.checkout.Session.create(
         payment_method_types=["card"],
-        line_items=[{"price": settings.stripe_price_id, "quantity": 1}],
+        line_items=[{"price": price_id, "quantity": 1}],
         mode="subscription",
         success_url="https://aster-amber.vercel.app/dashboard?upgraded=true",
         cancel_url="https://aster-amber.vercel.app/dashboard",
         client_reference_id=user_id,
-        customer_email=user.email,
+        customer_email=user.email if user else None,
     )
     return {"url": session.url}
 

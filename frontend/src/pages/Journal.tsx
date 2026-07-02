@@ -96,7 +96,7 @@ export default function Journal() {
                 <p className="text-sm font-semibold text-slate-200">Analyse IA disponible en Premium</p>
                 <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
                   Détection de l'émotion dominante, du besoin émotionnel, reformulation bienveillante
-                  et exercice recommandé — à partir de 1€.
+                  et exercice recommandé — disponible en Premium.
                 </p>
               </div>
             </div>

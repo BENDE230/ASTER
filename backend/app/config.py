@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     allowed_origins: str = "*"
     stripe_secret_key: str = ""
     stripe_price_id: str = ""
+    stripe_price_id_yearly: str = ""
     stripe_webhook_secret: str = ""
 
     class Config:

@@ -126,7 +126,7 @@ export default function Insights() {
             <p className="text-xs text-slate-500 leading-relaxed">
               {isPremium
                 ? 'Ta synthèse IA sera disponible chaque semaine selon tes entrées.'
-                : "Une synthèse personnalisée de tes patterns, rédigée chaque semaine par l'IA — disponible à partir de 1€."}
+                : "Une synthèse personnalisée de tes patterns, rédigée chaque semaine par l'IA — disponible en Premium."}
             </p>
           </div>
         </div>
