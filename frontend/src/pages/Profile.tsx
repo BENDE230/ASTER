@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useUser, useClerk } from '@clerk/clerk-react'
 import { useNavigate } from 'react-router-dom'
 import { LogOut, Crown, CreditCard, Calendar, ChevronRight, User, Shield, ExternalLink, Bell, BellOff, Send } from 'lucide-react'
-import Sidebar from '../components/Sidebar'
 import { useApi } from '../hooks/useApi'
+import { useCachedQuery } from '../hooks/useCachedQuery'
 import { useToast } from '../components/Toast'
 
 interface Subscription {
@@ -19,6 +19,9 @@ interface NotifSettings {
   email: string | null
 }
 
+const EMPTY_SUB: Subscription = { is_premium: false, plan: null, ends_at: null, customer_id: null }
+const EMPTY_NOTIF: NotifSettings = { enabled: false, hour: 9, email: null }
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('fr-FR', {
     day: 'numeric', month: 'long', year: 'numeric',
@@ -28,41 +31,23 @@ function formatDate(iso: string) {
 export default function Profile() {
   const { user } = useUser()
   const { signOut } = useClerk()
-  const { get, post, patch } = useApi()
+  const { post, patch } = useApi()
   const navigate = useNavigate()
   const toast = useToast()
-  const [sub, setSub] = useState<Subscription | null>(null)
-  const [loadingSub, setLoadingSub] = useState(true)
+  const { data: sub, loading: loadingSub } = useCachedQuery<Subscription>('/api/stripe/subscription', EMPTY_SUB)
+  const { data: notifRaw, setData: setNotifRaw } = useCachedQuery<NotifSettings>('/api/notifications/settings', EMPTY_NOTIF)
+  const notif: NotifSettings = {
+    ...notifRaw,
+    email: notifRaw.email ?? user?.primaryEmailAddress?.emailAddress ?? null,
+  }
+  const setNotif = (updater: NotifSettings | ((prev: NotifSettings) => NotifSettings)) => {
+    setNotifRaw(typeof updater === 'function' ? updater(notifRaw) : updater)
+  }
   const [loadingPortal, setLoadingPortal] = useState(false)
-  const [notif, setNotif] = useState<NotifSettings>({ enabled: false, hour: 9, email: null })
   const [savingNotif, setSavingNotif] = useState(false)
   const [sendingTest, setSendingTest] = useState(false)
   const [testSent, setTestSent] = useState(false)
   const [testError, setTestError] = useState('')
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const data = await get<Subscription>('/api/stripe/subscription')
-        setSub(data)
-      } catch {
-        setSub({ is_premium: false, plan: null, ends_at: null, customer_id: null })
-      } finally {
-        setLoadingSub(false)
-      }
-    }
-    const loadNotif = async () => {
-      try {
-        const data = await get<NotifSettings>('/api/notifications/settings')
-        setNotif(prev => ({
-          ...data,
-          email: data.email ?? user?.primaryEmailAddress?.emailAddress ?? null,
-        }))
-      } catch {}
-    }
-    load()
-    loadNotif()
-  }, [user])
 
   const saveNotif = async (updated: Partial<NotifSettings>) => {
     const next = { ...notif, ...updated }
@@ -118,10 +103,7 @@ export default function Profile() {
   const planLabel = sub?.plan === 'yearly' ? 'Annuel · 299 € / an' : 'Mensuel · 39 € / mois'
 
   return (
-    <div className="min-h-screen bg-navy-950 flex">
-      <Sidebar />
-
-      <main className="md:ml-[210px] flex-1 px-4 md:px-8 py-6 md:py-8 max-w-xl pb-24 md:pb-8">
+    <main className="md:ml-[210px] flex-1 px-4 md:px-8 py-6 md:py-8 max-w-xl pb-24 md:pb-8">
         <p className="text-xs text-slate-500 mb-2 font-medium">Mon compte</p>
         <h1 className="text-2xl md:text-3xl font-bold text-white mb-7">Profil</h1>
 
@@ -328,8 +310,6 @@ export default function Profile() {
           <LogOut size={14} />
           Se déconnecter
         </button>
-      </main>
-
-    </div>
+    </main>
   )
 }

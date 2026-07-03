@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useUser } from '@clerk/clerk-react'
 import { Clock, BookOpen, TrendingUp, ChevronRight } from 'lucide-react'
-import Sidebar from '../components/Sidebar'
 import { Skeleton, SkeletonStat, SkeletonCheckinItem } from '../components/Skeleton'
 import { useApi } from '../hooks/useApi'
+import { useCachedQuery } from '../hooks/useCachedQuery'
+import { invalidateCache } from '../lib/api'
 
 const PROTOCOLS = [
   { id: 'ancrage-5-sens',       tag: 'Anti-rumination', tagColor: 'text-violet-400 bg-violet-400/10',   duration: '3 min', title: 'Ancrage par les 5 sens' },
@@ -46,55 +47,42 @@ function getJournalLabel() {
   return { title: 'Journal du soir', subtitle: 'Écrire ce qui reste avant de dormir' }
 }
 
+const EMPTY_STATS: Stats = { streak: 0, total_this_month: 0, week: [], recent: [] }
+
 export default function Dashboard() {
   const navigate = useNavigate()
   const { user } = useUser()
-  const { get, post } = useApi()
+  const { post } = useApi()
   const firstName = user?.firstName ?? 'toi'
-
-  const [stats, setStats] = useState<Stats>({ streak: 0, total_this_month: 0, week: [], recent: [] })
-  const [checkedInToday, setCheckedInToday] = useState(false)
-  const [isPremium, setIsPremium] = useState(false)
-  const [loadingStats, setLoadingStats] = useState(true)
   const journalLabel = getJournalLabel()
+
+  const { data: stats, loading: loadingStats, refresh } = useCachedQuery<Stats>(
+    '/api/checkins/stats',
+    EMPTY_STATS,
+  )
+
+  const checkedInToday = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10)
+    return stats.week.some(d => d.date === today && d.calm_avg !== null)
+  }, [stats.week])
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     if (params.get('upgraded') === 'true') {
       post<{ is_premium: boolean }>('/api/stripe/activate-premium', {})
-        .then(data => { if (data?.is_premium) setIsPremium(true) })
+        .then(() => invalidateCache('/api/stripe/user-status'))
         .catch(() => {})
       window.history.replaceState({}, '', '/dashboard')
-    } else {
-      get<{ is_premium: boolean }>('/api/stripe/user-status')
-        .then(data => { if (data?.is_premium) setIsPremium(true) })
-        .catch(() => {})
     }
-  }, [])
-
-  const fetchStats = (showLoading = false) => {
-    if (showLoading) setLoadingStats(true)
-    get<Stats>('/api/checkins/stats')
-      .then(data => {
-        setStats(data)
-        const today = new Date().toISOString().slice(0, 10)
-        setCheckedInToday(data.week.some(d => d.date === today && d.calm_avg !== null))
-      })
-      .catch(() => {})
-      .finally(() => setLoadingStats(false))
-  }
+  }, [post])
 
   useEffect(() => {
-    fetchStats(true)
-    const onFocus = () => fetchStats()
+    const onFocus = () => refresh()
     window.addEventListener('focus', onFocus)
     return () => window.removeEventListener('focus', onFocus)
-  }, [])
+  }, [refresh])
 
   return (
-    <div className="min-h-screen bg-navy-950 flex">
-      <Sidebar isPremium={isPremium} />
-
       <main className="md:ml-[210px] flex-1 px-4 md:px-8 py-6 md:py-8 max-w-3xl pb-24 md:pb-8">
         {/* Header */}
         <div className="mb-6">
@@ -257,7 +245,5 @@ export default function Dashboard() {
           </div>
         </div>
       </main>
-
-    </div>
   )
 }

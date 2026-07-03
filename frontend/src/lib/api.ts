@@ -4,7 +4,7 @@ type RequestOptions = RequestInit & { token?: string }
 
 // Simple in-memory GET cache — 30s TTL
 const cache = new Map<string, { data: unknown; ts: number }>()
-const CACHE_TTL = 30_000
+const CACHE_TTL = 5 * 60_000 // 5 minutes
 
 function getCached<T>(key: string): T | null {
   const entry = cache.get(key)

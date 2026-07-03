@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Clock, Lock, X, ChevronRight, CheckCircle2, Play, Pause } from 'lucide-react'
-import Sidebar from '../components/Sidebar'
 import { usePremium } from '../hooks/usePremium'
 
 const CATEGORIES = ['Tous', 'Anti-rumination', 'Respiration', 'Retour au corps', 'Hypervigilance', 'Sommeil', 'Sécurité émotionnelle']
@@ -664,9 +663,7 @@ export default function Protocols() {
   }
 
   return (
-    <div className="min-h-screen bg-navy-950 flex">
-      <Sidebar />
-
+    <>
       <main className="md:ml-[210px] flex-1 px-4 md:px-8 py-6 md:py-8 max-w-3xl pb-24 md:pb-8">
         <p className="text-xs text-slate-500 mb-2 font-medium">Bibliothèque</p>
         <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">Protocoles de régulation.</h1>
@@ -745,7 +742,6 @@ export default function Protocols() {
           onClose={() => setSelectedProtocol(null)}
         />
       )}
-
-    </div>
+    </>
   )
 }

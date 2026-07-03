@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Lock, TrendingUp, Sparkles, CheckCircle } from 'lucide-react'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
-import Sidebar from '../components/Sidebar'
 import PremiumGate from '../components/PremiumGate'
 import { usePremium } from '../hooks/usePremium'
 import { useApi } from '../hooks/useApi'
+import { useCachedQuery } from '../hooks/useCachedQuery'
 
 interface InsightsData {
   distribution: { name: string; value: number; count: number; color: string }[]
@@ -16,6 +16,15 @@ interface InsightsData {
 }
 
 const DAYS = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di']
+
+const EMPTY_INSIGHTS: InsightsData = {
+  distribution: [],
+  week: [],
+  patterns: [],
+  total_30: 0,
+  total_7: 0,
+  has_data: false,
+}
 
 function getWeekRange() {
   const now = new Date()
@@ -30,18 +39,10 @@ function getWeekRange() {
 
 export default function Insights() {
   const isPremium = usePremium()
-  const { get, post } = useApi()
-  const [data, setData] = useState<InsightsData | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { post } = useApi()
+  const { data, loading } = useCachedQuery<InsightsData>('/api/insights', EMPTY_INSIGHTS)
   const [weeklyNote, setWeeklyNote] = useState('')
   const [loadingNote, setLoadingNote] = useState(false)
-
-  useEffect(() => {
-    get<InsightsData>('/api/insights')
-      .then(d => setData(d))
-      .catch(() => setData(null))
-      .finally(() => setLoading(false))
-  }, [])
 
   const generateWeeklyNote = async () => {
     if (!isPremium) return
@@ -62,10 +63,7 @@ export default function Insights() {
   const hasData = data?.has_data ?? false
 
   return (
-    <div className="min-h-screen bg-navy-950 flex">
-      <Sidebar />
-
-      <main className="md:ml-[210px] flex-1 px-4 md:px-8 py-6 md:py-8 max-w-3xl pb-24 md:pb-8">
+    <main className="md:ml-[210px] flex-1 px-4 md:px-8 py-6 md:py-8 max-w-3xl pb-24 md:pb-8">
         <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">Tes patterns cette semaine.</h1>
         <p className="text-sm text-slate-500 mb-2">{getWeekRange()}</p>
         {!loading && data && (
@@ -73,7 +71,7 @@ export default function Insights() {
             {data.total_7} check-in{data.total_7 > 1 ? 's' : ''} cette semaine · {data.total_30} ce mois
           </p>
         )}
-        {!loading && !data && (
+        {!loading && !data?.has_data && (
           <p className="text-xs text-slate-600 mb-6">Données en cours de chargement...</p>
         )}
 
@@ -252,6 +250,5 @@ export default function Insights() {
           )}
         </div>
       </main>
-    </div>
   )
 }

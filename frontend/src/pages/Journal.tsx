@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Lock, Sparkles, BookOpen, Brain, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
-import Sidebar from '../components/Sidebar'
 import { SkeletonEntry } from '../components/Skeleton'
 import { useApi } from '../hooks/useApi'
+import { useCachedQuery } from '../hooks/useCachedQuery'
 import { usePremium } from '../hooks/usePremium'
 import { useToast } from '../components/Toast'
+import { invalidateCache } from '../lib/api'
 
 interface AiAnalysis {
   emotion: string
@@ -19,6 +20,13 @@ interface Entry {
   created_at: string
   ai_analysis: AiAnalysis | null
 }
+
+interface JournalData {
+  entries: Entry[]
+  is_premium: boolean
+}
+
+const EMPTY_JOURNAL: JournalData = { entries: [], is_premium: false }
 
 function formatDate(iso: string) {
   const d = new Date(iso)
@@ -154,8 +162,6 @@ export default function Journal() {
   const [content, setContent] = useState('')
   const [saved, setSaved] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [entries, setEntries] = useState<Entry[]>([])
-  const [loadingEntries, setLoadingEntries] = useState(true)
   const [newEntryId, setNewEntryId] = useState<number | null>(null)
 
   // For new entry analysis
@@ -163,41 +169,31 @@ export default function Journal() {
   const [analyzing, setAnalyzing] = useState(false)
   const [analyzeError, setAnalyzeError] = useState('')
 
-  const { get, post, patch } = useApi()
+  const { post, patch } = useApi()
   const isPremium = usePremium()
   const toast = useToast()
+  const { data: journalData, loading: loadingEntries, setData: setJournalData } = useCachedQuery<JournalData>(
+    '/api/journal',
+    EMPTY_JOURNAL,
+  )
+  const entries = journalData.entries
+  const setEntries = (updater: Entry[] | ((prev: Entry[]) => Entry[])) => {
+    setJournalData(prev => ({
+      ...prev,
+      entries: typeof updater === 'function' ? updater(prev.entries) : updater,
+    }))
+  }
 
   const today = new Date().toLocaleDateString('fr-FR', {
     weekday: 'long', day: 'numeric', month: 'long',
   }) + ' · ' + new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
-
-  useEffect(() => {
-    const load = async () => {
-      setLoadingEntries(true)
-      try {
-        const data = await get<{ entries: Entry[]; is_premium: boolean }>('/api/journal')
-        setEntries(data.entries)
-      } catch {
-        // fallback: load from localStorage
-        const local = JSON.parse(localStorage.getItem('aster_journal') ?? '[]')
-        setEntries(local.map((e: { content: string; date: string }, i: number) => ({
-          id: -(i + 1),
-          content: e.content,
-          created_at: e.date,
-          ai_analysis: null,
-        })))
-      } finally {
-        setLoadingEntries(false)
-      }
-    }
-    load()
-  }, [])
 
   const handleSave = async () => {
     if (!content.trim()) return
     setSaving(true)
     try {
       const result = await post<{ id: number; created_at: string }>('/api/journal', { content })
+      invalidateCache('/api/journal')
       const newEntry: Entry = { id: result.id, content, created_at: result.created_at, ai_analysis: null }
       setEntries(prev => [newEntry, ...prev])
       setNewEntryId(result.id)
@@ -244,10 +240,7 @@ export default function Journal() {
   }
 
   return (
-    <div className="min-h-screen bg-navy-950 flex">
-      <Sidebar />
-
-      <main className="md:ml-[210px] flex-1 px-4 md:px-8 py-6 md:py-8 max-w-2xl pb-24 md:pb-8">
+    <main className="md:ml-[210px] flex-1 px-4 md:px-8 py-6 md:py-8 max-w-2xl pb-24 md:pb-8">
         <p className="text-xs text-slate-500 mb-2 font-medium">Journal émotionnel</p>
         <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">Écris ce que tu ressens.</h1>
         <p className="text-sm text-slate-400 mb-7">Sans filtre, sans jugement. C'est ton espace.</p>
@@ -401,8 +394,6 @@ export default function Journal() {
             </div>
           )}
         </div>
-      </main>
-
-    </div>
+    </main>
   )
 }
