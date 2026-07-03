@@ -28,6 +28,15 @@ function setCached(key: string, data: unknown) {
   cache.set(key, { data, ts: Date.now() })
 }
 
+export function isCacheFresh(path: string): boolean {
+  for (const [key, entry] of cache.entries()) {
+    if (key.endsWith(`:${path}`)) {
+      return Date.now() - entry.ts <= CACHE_TTL
+    }
+  }
+  return false
+}
+
 export function invalidateCache(path?: string) {
   if (path) {
     for (const key of cache.keys()) {

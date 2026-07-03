@@ -6,12 +6,6 @@ import ProtectedLayout from './components/ProtectedLayout'
 import Landing from './pages/Landing'
 import Onboarding from './pages/Onboarding'
 import SpaceReady from './pages/SpaceReady'
-import Dashboard from './pages/Dashboard'
-import CheckIn from './pages/CheckIn'
-import Journal from './pages/Journal'
-import Protocols from './pages/Protocols'
-import Insights from './pages/Insights'
-import Profile from './pages/Profile'
 
 const PROTECTED_PATHS = ['/dashboard', '/checkin', '/journal', '/protocols', '/insights', '/profile']
 
@@ -33,12 +27,12 @@ function AppLayout() {
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/space-ready" element={<SpaceReady />} />
         <Route element={<ProtectedRoute><ProtectedLayout /></ProtectedRoute>}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/checkin" element={<CheckIn />} />
-          <Route path="/journal" element={<Journal />} />
-          <Route path="/protocols" element={<Protocols />} />
-          <Route path="/insights" element={<Insights />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/dashboard" />
+          <Route path="/checkin" />
+          <Route path="/journal" />
+          <Route path="/protocols" />
+          <Route path="/insights" />
+          <Route path="/profile" />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
