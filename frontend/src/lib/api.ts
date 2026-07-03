@@ -13,13 +13,29 @@ function getCached<T>(key: string): T | null {
   return entry.data as T
 }
 
+// Check cache by path only (before token is available)
+export function getCachedFirst<T>(path: string): T | null {
+  for (const [key, entry] of cache.entries()) {
+    if (key.endsWith(`:${path}`)) {
+      if (Date.now() - entry.ts > CACHE_TTL) { cache.delete(key); return null }
+      return entry.data as T
+    }
+  }
+  return null
+}
+
 function setCached(key: string, data: unknown) {
   cache.set(key, { data, ts: Date.now() })
 }
 
 export function invalidateCache(path?: string) {
-  if (path) cache.delete(path)
-  else cache.clear()
+  if (path) {
+    for (const key of cache.keys()) {
+      if (key.endsWith(`:${path}`)) cache.delete(key)
+    }
+  } else {
+    cache.clear()
+  }
 }
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
