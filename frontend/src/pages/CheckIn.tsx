@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Clock, CheckCircle2, ArrowRight, RotateCcw, LayoutDashboard } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
+import StreakCelebration from '../components/StreakCelebration'
 import { useApi } from '../hooks/useApi'
 
 const OPTIONS = [
@@ -47,6 +48,9 @@ export default function CheckIn() {
   const [done, setDone] = useState(false)
   const [stats, setStats] = useState<Stats | null>(null)
   const [loadingStats, setLoadingStats] = useState(true)
+  const [celebrationStreak, setCelebrationStreak] = useState<number | null>(null)
+
+  const STREAK_MILESTONES = [3, 7, 14, 21, 30, 60, 90]
 
   useEffect(() => {
     get<Stats>('/api/checkins/stats')
@@ -67,7 +71,12 @@ export default function CheckIn() {
     } finally {
       setLoading(false)
     }
-    get<Stats>('/api/checkins/stats').then(data => setStats(data)).catch(() => {})
+    get<Stats>('/api/checkins/stats').then(newStats => {
+      setStats(newStats)
+      if (STREAK_MILESTONES.includes(newStats.streak)) {
+        setCelebrationStreak(newStats.streak)
+      }
+    }).catch(() => {})
     setDone(true)
   }
 
@@ -76,6 +85,12 @@ export default function CheckIn() {
     return (
       <div className="min-h-screen bg-navy-950 flex">
         <Sidebar />
+        {celebrationStreak && (
+          <StreakCelebration
+            streak={celebrationStreak}
+            onClose={() => setCelebrationStreak(null)}
+          />
+        )}
         <main className="md:ml-[210px] flex-1 px-4 md:px-8 py-6 md:py-8 max-w-lg pb-24 md:pb-8 flex flex-col justify-center">
           {/* Success header */}
           <div className="text-center mb-8">
