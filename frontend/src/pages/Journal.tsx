@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Lock, Sparkles, BookOpen, Brain, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
+import { SkeletonEntry } from '../components/Skeleton'
 import { useApi } from '../hooks/useApi'
 import { usePremium } from '../hooks/usePremium'
 
@@ -358,9 +359,8 @@ export default function Journal() {
 
           {loadingEntries ? (
             <div className="space-y-2">
-              {[1, 2].map(i => (
-                <div key={i} className="rounded-xl border border-navy-700 bg-navy-800 h-20 animate-pulse" />
-              ))}
+              <SkeletonEntry />
+              <SkeletonEntry />
             </div>
           ) : entries.length === 0 ? (
             <div className="rounded-xl border border-navy-700 bg-navy-800/50 px-4 py-6 text-center">

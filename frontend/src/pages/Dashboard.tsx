@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useUser } from '@clerk/clerk-react'
-import { Flame, Clock, BookOpen, TrendingUp, ChevronRight } from 'lucide-react'
+import { Clock, BookOpen, TrendingUp, ChevronRight } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
+import { Skeleton, SkeletonStat, SkeletonCheckinItem } from '../components/Skeleton'
 import { useApi } from '../hooks/useApi'
 
 const PROTOCOLS = [
@@ -54,6 +55,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState<Stats>({ streak: 0, total_this_month: 0, week: [], recent: [] })
   const [checkedInToday, setCheckedInToday] = useState(false)
   const [isPremium, setIsPremium] = useState(false)
+  const [loadingStats, setLoadingStats] = useState(true)
   const journalLabel = getJournalLabel()
 
   useEffect(() => {
@@ -70,7 +72,8 @@ export default function Dashboard() {
     }
   }, [])
 
-  const fetchStats = () => {
+  const fetchStats = (showLoading = false) => {
+    if (showLoading) setLoadingStats(true)
     get<Stats>('/api/checkins/stats')
       .then(data => {
         setStats(data)
@@ -78,11 +81,11 @@ export default function Dashboard() {
         setCheckedInToday(data.week.some(d => d.date === today && d.calm_avg !== null))
       })
       .catch(() => {})
+      .finally(() => setLoadingStats(false))
   }
 
   useEffect(() => {
-    fetchStats()
-    // Refresh on window focus
+    fetchStats(true)
     window.addEventListener('focus', fetchStats)
     return () => window.removeEventListener('focus', fetchStats)
   }, [])
@@ -135,17 +138,21 @@ export default function Dashboard() {
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3 mb-5">
-          {[
-            { emoji: '🔥', value: stats.streak,           label: 'Jours de suite' },
-            { emoji: '📊', value: stats.total_this_month, label: 'Check-ins ce mois' },
-            { emoji: '📓', value: stats.recent?.length ?? 0, label: 'Activités récentes' },
-          ].map(({ emoji, value, label }) => (
-            <div key={label} className="stat-card">
-              <span className="text-base">{emoji}</span>
-              <p className="text-2xl font-bold text-white mt-1">{value}</p>
-              <p className="text-xs text-slate-500">{label}</p>
-            </div>
-          ))}
+          {loadingStats ? (
+            <><SkeletonStat /><SkeletonStat /><SkeletonStat /></>
+          ) : (
+            [
+              { emoji: '🔥', value: stats.streak,              label: 'Jours de suite' },
+              { emoji: '📊', value: stats.total_this_month,    label: 'Check-ins ce mois' },
+              { emoji: '📓', value: stats.recent?.length ?? 0, label: 'Activités récentes' },
+            ].map(({ emoji, value, label }) => (
+              <div key={label} className="stat-card">
+                <span className="text-base">{emoji}</span>
+                <p className="text-2xl font-bold text-white mt-1">{value}</p>
+                <p className="text-xs text-slate-500">{label}</p>
+              </div>
+            ))
+          )}
         </div>
 
         {/* Emotional week */}
@@ -153,25 +160,36 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <p className="text-sm font-semibold text-white">Semaine émotionnelle</p>
-              <p className="text-xs text-slate-500">Calme perçu · de 1 à 10</p>
+              <p className="text-xs text-slate-500">Check-ins cette semaine</p>
             </div>
             <TrendingUp size={16} className="text-periwinkle-400" />
           </div>
-          <div className="flex items-end gap-2 h-14">
-            {DAYS.map((day, i) => {
-              const dayData = stats.week[i]
-              const hasData = dayData?.count > 0
-              return (
-                <div key={day} className="flex-1 flex flex-col items-center gap-1" title={dayData?.feeling ?? ''}>
-                  <div
-                    className={`w-full rounded-sm transition-all ${hasData ? 'bg-periwinkle-500' : 'bg-navy-700'}`}
-                    style={{ height: hasData ? '100%' : '8%', minHeight: '4px' }}
-                  />
+          {loadingStats ? (
+            <div className="flex items-end gap-2 h-14">
+              {DAYS.map(day => (
+                <div key={day} className="flex-1 flex flex-col items-center gap-1">
+                  <div className="w-full rounded-sm bg-navy-700 animate-pulse" style={{ height: `${20 + Math.random() * 60}%` }} />
                   <span className="text-xs text-slate-600">{day}</span>
                 </div>
-              )
-            })}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex items-end gap-2 h-14">
+              {DAYS.map((day, i) => {
+                const dayData = stats.week[i]
+                const hasData = dayData?.count > 0
+                return (
+                  <div key={day} className="flex-1 flex flex-col items-center gap-1" title={dayData?.feeling ?? ''}>
+                    <div
+                      className={`w-full rounded-sm transition-all ${hasData ? 'bg-periwinkle-500' : 'bg-navy-700'}`}
+                      style={{ height: hasData ? '100%' : '8%', minHeight: '4px' }}
+                    />
+                    <span className="text-xs text-slate-600">{day}</span>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
 
         {/* Recommended protocols */}
@@ -216,7 +234,9 @@ export default function Dashboard() {
         <div>
           <p className="section-title mb-3">Activité récente</p>
           <div className="space-y-2">
-            {!stats.recent?.length ? (
+            {loadingStats ? (
+              <><SkeletonCheckinItem /><SkeletonCheckinItem /><SkeletonCheckinItem /></>
+            ) : !stats.recent?.length ? (
               <p className="text-sm text-slate-500 italic px-1">Aucune activité pour l'instant. Fais ton premier check-in !</p>
             ) : (
               stats.recent.slice(0, 4).map(c => (
