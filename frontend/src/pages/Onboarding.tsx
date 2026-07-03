@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Moon, ChevronLeft, ArrowRight } from 'lucide-react'
+import { AnalyticsEvents, track } from '../lib/analytics'
 
 const STEPS = [
   {
@@ -56,9 +57,17 @@ export default function Onboarding() {
   const totalSteps = STEPS.length
 
   const handleContinue = () => {
+    if (!current) return
+    track(AnalyticsEvents.ONBOARDING_STEP_COMPLETED, {
+      step: step + 1,
+      key: current.key,
+      answer: answers[current.key],
+    })
+
     if (step < totalSteps - 1) {
       setStep(s => s + 1)
     } else {
+      track(AnalyticsEvents.ONBOARDING_COMPLETED, answers)
       localStorage.setItem('aster_onboarding', JSON.stringify(answers))
       navigate('/space-ready')
     }
@@ -114,7 +123,10 @@ export default function Onboarding() {
 
           {/* CTA */}
           <button
-            onClick={() => setStep(0)}
+            onClick={() => {
+              track(AnalyticsEvents.ONBOARDING_STARTED)
+              setStep(0)
+            }}
             className="w-full flex items-center justify-center gap-2 h-12 rounded-xl bg-periwinkle-500 hover:bg-periwinkle-400 text-white font-semibold transition-colors"
           >
             Commencer

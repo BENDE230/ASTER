@@ -6,6 +6,7 @@ import { useCachedQuery } from '../hooks/useCachedQuery'
 import { usePremium } from '../hooks/usePremium'
 import { useToast } from '../components/Toast'
 import { invalidateCache } from '../lib/api'
+import { AnalyticsEvents, track } from '../lib/analytics'
 
 interface AiAnalysis {
   emotion: string
@@ -194,6 +195,7 @@ export default function Journal() {
     try {
       const result = await post<{ id: number; created_at: string }>('/api/journal', { content })
       invalidateCache('/api/journal')
+      track(AnalyticsEvents.JOURNAL_ENTRY_SAVED, { length: content.length })
       const newEntry: Entry = { id: result.id, content, created_at: result.created_at, ai_analysis: null }
       setEntries(prev => [newEntry, ...prev])
       setNewEntryId(result.id)

@@ -6,6 +6,7 @@ import { useToast } from '../components/Toast'
 import { useApi } from '../hooks/useApi'
 import { useCachedQuery } from '../hooks/useCachedQuery'
 import { invalidateCache } from '../lib/api'
+import { AnalyticsEvents, track } from '../lib/analytics'
 
 const OPTIONS = [
   { emoji: '🌀', label: 'Je suranalyse',      description: 'Les pensées tournent sans fin.',          protocol: 'ancrage-5-sens' },
@@ -65,6 +66,7 @@ export default function CheckIn() {
     try {
       await post('/api/checkins', { feeling: selected.label })
       invalidateCache()
+      track(AnalyticsEvents.CHECKIN_COMPLETED, { feeling: selected.label })
       toast.success('Check-in enregistré ✓')
     } catch {
       const prev = JSON.parse(localStorage.getItem('aster_checkins') ?? '[]')

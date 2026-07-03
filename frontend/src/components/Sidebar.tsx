@@ -5,6 +5,7 @@ import { Home, CheckCircle, BookOpen, Shield, Sparkles, Moon, Zap, LogOut, X, Us
 import { useApi } from '../hooks/useApi'
 import { usePremium } from '../hooks/usePremium'
 import { useToast } from './Toast'
+import { AnalyticsEvents, track } from '../lib/analytics'
 
 const NAV = [
   { to: '/dashboard',  label: 'Accueil',    icon: Home },
@@ -33,6 +34,7 @@ export default function Sidebar({ trialDaysLeft = 5 }: SidebarProps) {
 
   const handleUpgrade = async (plan: 'monthly' | 'yearly') => {
     setLoading(plan)
+    track(AnalyticsEvents.PREMIUM_CHECKOUT_CLICKED, { plan, source: 'sidebar' })
     try {
       const data = await post<{ url: string }>(`/api/stripe/create-checkout?plan=${plan}`, {})
       if (data?.url) window.location.href = data.url

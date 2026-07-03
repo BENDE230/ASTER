@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useClerk, useAuth } from '@clerk/clerk-react'
 import { Moon, ArrowRight, CheckCircle2, BookOpen, Sparkles, Shield } from 'lucide-react'
 import { useApi } from '../hooks/useApi'
+import { AnalyticsEvents, track } from '../lib/analytics'
 
 const PROTOCOL_MAP: Record<string, { protocol: string; emoji: string }> = {
   'Submergé·e':    { protocol: 'exercices de régulation douce', emoji: '🌊' },
@@ -39,8 +40,10 @@ export default function SpaceReady() {
 
   const handleAccess = () => {
     if (isSignedIn) {
+      track(AnalyticsEvents.CTA_CLICKED, { location: 'space_ready', signed_in: true })
       navigate('/dashboard')
     } else {
+      track(AnalyticsEvents.SIGNUP_STARTED, { feeling })
       openSignUp({ afterSignUpUrl: '/dashboard', afterSignInUrl: '/dashboard' })
     }
   }

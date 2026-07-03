@@ -1,9 +1,11 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth, SignInButton } from '@clerk/clerk-react'
 import {
   Moon, CheckCircle, Brain, Shield, Sparkles, BookOpen,
   ChevronRight, Star, ArrowRight, Zap, Heart, TrendingUp, Clock,
 } from 'lucide-react'
+import { AnalyticsEvents, track } from '../lib/analytics'
 
 const FEATURES = [
   {
@@ -182,7 +184,12 @@ export default function Landing() {
   const navigate = useNavigate()
   const { isSignedIn } = useAuth()
 
+  useEffect(() => {
+    track(AnalyticsEvents.LANDING_VIEWED)
+  }, [])
+
   const handleStart = () => {
+    track(AnalyticsEvents.CTA_CLICKED, { location: 'hero', signed_in: isSignedIn })
     navigate(isSignedIn ? '/dashboard' : '/onboarding')
   }
 

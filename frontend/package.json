@@ -10,11 +10,12 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.0.0",
+    "lucide-react": "^0.395.0",
+    "posthog-js": "^1.396.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.24.0",
-    "recharts": "^2.12.7",
-    "lucide-react": "^0.395.0"
+    "recharts": "^2.12.7"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",

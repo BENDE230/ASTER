@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@clerk/clerk-react'
 import { ToastProvider } from './components/Toast'
+import PostHogProvider from './components/PostHogProvider'
 import BottomNav from './components/BottomNav'
 import ProtectedLayout from './components/ProtectedLayout'
 import Landing from './pages/Landing'
@@ -44,9 +45,11 @@ function AppLayout() {
 export default function App() {
   return (
     <BrowserRouter>
-      <ToastProvider>
-        <AppLayout />
-      </ToastProvider>
+      <PostHogProvider>
+        <ToastProvider>
+          <AppLayout />
+        </ToastProvider>
+      </PostHogProvider>
     </BrowserRouter>
   )
 }

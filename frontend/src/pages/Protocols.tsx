@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Clock, Lock, X, ChevronRight, CheckCircle2, Play, Pause } from 'lucide-react'
 import { usePremium } from '../hooks/usePremium'
+import { AnalyticsEvents, track } from '../lib/analytics'
 
 const CATEGORIES = ['Tous', 'Anti-rumination', 'Respiration', 'Retour au corps', 'Hypervigilance', 'Sommeil', 'Sécurité émotionnelle']
 
@@ -659,6 +660,12 @@ export default function Protocols() {
 
   const handleClick = (p: Protocol) => {
     if (p.premium && !isPremium) return
+    track(AnalyticsEvents.PROTOCOL_OPENED, {
+      protocol_id: p.id,
+      title: p.title,
+      category: p.category,
+      premium: p.premium,
+    })
     setSelectedProtocol(p)
   }
 

@@ -6,6 +6,7 @@ import { Skeleton, SkeletonStat, SkeletonCheckinItem } from '../components/Skele
 import { useApi } from '../hooks/useApi'
 import { useCachedQuery } from '../hooks/useCachedQuery'
 import { invalidateCache } from '../lib/api'
+import { AnalyticsEvents, track } from '../lib/analytics'
 
 const PROTOCOLS = [
   { id: 'ancrage-5-sens',       tag: 'Anti-rumination', tagColor: 'text-violet-400 bg-violet-400/10',   duration: '3 min', title: 'Ancrage par les 5 sens' },
@@ -70,7 +71,10 @@ export default function Dashboard() {
     const params = new URLSearchParams(window.location.search)
     if (params.get('upgraded') === 'true') {
       post<{ is_premium: boolean }>('/api/stripe/activate-premium', {})
-        .then(() => invalidateCache('/api/stripe/user-status'))
+        .then(() => {
+          track(AnalyticsEvents.PREMIUM_CONVERTED, { source: 'stripe_return' })
+          invalidateCache('/api/stripe/user-status')
+        })
         .catch(() => {})
       window.history.replaceState({}, '', '/dashboard')
     }
