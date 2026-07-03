@@ -1,23 +1,21 @@
-import { useState } from 'react'
-import { Lock, TrendingUp, Sparkles } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Lock, TrendingUp, Sparkles, CheckCircle } from 'lucide-react'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import Sidebar from '../components/Sidebar'
 import PremiumGate from '../components/PremiumGate'
 import { usePremium } from '../hooks/usePremium'
 import { useApi } from '../hooks/useApi'
 
-const DOMINANT_STATES = [
-  { name: 'Rumination',       value: 38, color: '#9b9ff5' },
-  { name: 'Fatigue',          value: 27, color: '#94a3b8' },
-  { name: 'Surcharge sociale',value: 20, color: '#c4b5fd' },
-  { name: 'Hypercontrôle',    value: 15, color: '#e2e8f0' },
-]
+interface InsightsData {
+  distribution: { name: string; value: number; count: number; color: string }[]
+  week: { date: string; count: number; feeling: string | null }[]
+  patterns: { label: string; desc: string; feeling: string; count: number; premium: boolean }[]
+  total_30: number
+  total_7: number
+  has_data: boolean
+}
 
-const PATTERNS = [
-  { label: 'Rumination fréquente', description: 'Tu présentes des cycles de pensées récurrentes, surtout en soirée.' },
-  { label: 'Fatigue de régulation', description: null, premium: true },
-  { label: 'Surcharge sociale', description: null, premium: true },
-]
+const DAYS = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di']
 
 function getWeekRange() {
   const now = new Date()
@@ -32,14 +30,24 @@ function getWeekRange() {
 
 export default function Insights() {
   const isPremium = usePremium()
-  const { post } = useApi()
+  const { get, post } = useApi()
+  const [data, setData] = useState<InsightsData | null>(null)
+  const [loading, setLoading] = useState(true)
   const [weeklyNote, setWeeklyNote] = useState('')
   const [loadingNote, setLoadingNote] = useState(false)
+
+  useEffect(() => {
+    get<InsightsData>('/api/insights')
+      .then(d => setData(d))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
 
   const generateWeeklyNote = async () => {
     if (!isPremium) return
     setLoadingNote(true)
     try {
+      // Use journal entries from API if available
       const entries = JSON.parse(localStorage.getItem('aster_journal') ?? '[]')
         .slice(0, 7)
         .map((e: { content: string }) => e.content)
@@ -58,98 +66,159 @@ export default function Insights() {
 
       <main className="md:ml-[210px] flex-1 px-4 md:px-8 py-6 md:py-8 max-w-3xl pb-24 md:pb-8">
         <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">Tes patterns cette semaine.</h1>
-        <p className="text-sm text-slate-500 mb-7">{getWeekRange()}</p>
+        <p className="text-sm text-slate-500 mb-2">{getWeekRange()}</p>
+        {!loading && data && (
+          <p className="text-xs text-slate-600 mb-6">
+            {data.total_7} check-in{data.total_7 > 1 ? 's' : ''} cette semaine · {data.total_30} ce mois
+          </p>
+        )}
+
+        {/* Empty state */}
+        {!loading && data && !data.has_data && (
+          <div className="rounded-xl border border-navy-700 bg-navy-800 px-6 py-10 text-center mb-6">
+            <span className="text-4xl mb-3 block">📊</span>
+            <p className="text-sm font-semibold text-white mb-1">Pas encore de données</p>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Fais ton premier check-in pour commencer à voir tes patterns émotionnels.
+            </p>
+          </div>
+        )}
 
         {/* Charts row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-          {/* Donut chart — free */}
-          <div className="rounded-xl border border-navy-700 bg-navy-800 p-5">
-            <p className="section-title mb-4">États dominants</p>
-            <div className="flex justify-center mb-4">
-              <ResponsiveContainer width={160} height={160}>
-                <PieChart>
-                  <Pie
-                    data={DOMINANT_STATES}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={75}
-                    dataKey="value"
-                    strokeWidth={0}
-                  >
-                    {DOMINANT_STATES.map((entry, index) => (
-                      <Cell key={index} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{ background: '#141728', border: '1px solid #232840', borderRadius: 8, fontSize: 12 }}
-                    formatter={(val: number) => [`${val}%`]}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="space-y-1.5">
-              {DOMINANT_STATES.map(s => (
-                <div key={s.name} className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: s.color }} />
-                    <span className="text-slate-400">{s.name}</span>
-                  </div>
-                  <span className="font-semibold text-white">{s.value}%</span>
+        {(loading || data?.has_data) && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+            {/* Donut chart — free */}
+            <div className="rounded-xl border border-navy-700 bg-navy-800 p-5">
+              <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-4">États dominants · 30 jours</p>
+              {loading ? (
+                <div className="h-40 flex items-center justify-center">
+                  <div className="w-6 h-6 border-2 border-periwinkle-500 border-t-transparent rounded-full animate-spin" />
                 </div>
-              ))}
+              ) : data?.distribution.length ? (
+                <>
+                  <div className="flex justify-center mb-4">
+                    <ResponsiveContainer width={160} height={160}>
+                      <PieChart>
+                        <Pie
+                          data={data.distribution}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={50}
+                          outerRadius={75}
+                          dataKey="value"
+                          strokeWidth={0}
+                        >
+                          {data.distribution.map((entry, index) => (
+                            <Cell key={index} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          contentStyle={{ background: '#141728', border: '1px solid #232840', borderRadius: 8, fontSize: 12 }}
+                          formatter={(val: number, _: string, props: { payload?: { count?: number } }) => [
+                            `${val}% (${props?.payload?.count ?? 0} fois)`
+                          ]}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="space-y-1.5">
+                    {data.distribution.map(s => (
+                      <div key={s.name} className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: s.color }} />
+                          <span className="text-slate-400">{s.name}</span>
+                        </div>
+                        <span className="font-semibold text-white">{s.value}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : null}
             </div>
-          </div>
 
-          {/* Line chart — premium */}
-          <div className="relative rounded-xl border border-navy-700 bg-navy-800 p-5 overflow-hidden">
-            <p className={`section-title mb-4 ${isPremium ? '' : 'opacity-30'}`}>Calme perçu · 7 jours</p>
-            <div className={`h-40 flex items-end gap-1 mb-2 ${isPremium ? 'opacity-100' : 'opacity-15'}`}>
-              {[4,6,5,7,5,8,6].map((v, i) => (
-                <div key={i} className="flex-1 bg-periwinkle-500 rounded-sm" style={{ height: `${v * 12}%` }} />
-              ))}
+            {/* Week bar chart — premium */}
+            <div className="relative rounded-xl border border-navy-700 bg-navy-800 p-5 overflow-hidden">
+              <p className={`text-xs font-semibold uppercase tracking-widest text-slate-500 mb-4 ${!isPremium ? 'opacity-30' : ''}`}>
+                Présence · 7 jours
+              </p>
+              {loading ? (
+                <div className="h-40 flex items-center justify-center">
+                  <div className="w-6 h-6 border-2 border-periwinkle-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : (
+                <div className={`flex items-end gap-1.5 h-32 mb-2 ${!isPremium ? 'opacity-15' : ''}`}>
+                  {DAYS.map((day, i) => {
+                    const d = data?.week[i]
+                    const hasDone = d && d.count > 0
+                    return (
+                      <div key={day} className="flex-1 flex flex-col items-center gap-1" title={d?.feeling ?? ''}>
+                        <div
+                          className={`w-full rounded-sm transition-all ${hasDone ? 'bg-periwinkle-500' : 'bg-navy-700'}`}
+                          style={{ height: hasDone ? '100%' : '10%' }}
+                        />
+                        <span className="text-[10px] text-slate-600">{day}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+              {!isPremium && (
+                <>
+                  <TrendingUp size={20} className="text-slate-600 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-30" />
+                  <PremiumGate title="Graphique Premium" className="absolute inset-4" />
+                </>
+              )}
             </div>
-            {!isPremium && (
-              <>
-                <TrendingUp size={20} className="text-slate-600 absolute top-16 left-1/2 -translate-x-1/2 opacity-30" />
-                <PremiumGate title="Graphique Premium" className="absolute inset-4" />
-              </>
-            )}
           </div>
-        </div>
+        )}
 
         {/* Patterns */}
-        <div className="mb-5">
-          <p className="section-title mb-3">Patterns détectés</p>
-          <div className="space-y-2">
-            {PATTERNS.map(p => (
-              <div key={p.label} className={`rounded-xl border border-navy-700 bg-navy-800 px-4 py-3.5 ${p.premium && !isPremium ? 'opacity-50 relative overflow-hidden' : ''}`}>
-                <p className={`text-sm font-semibold mb-0.5 ${p.premium && !isPremium ? 'blur-sm select-none text-slate-300' : 'text-white'}`}>{p.label}</p>
-                {p.description && (
-                  <p className="text-xs text-slate-500">{p.description}</p>
-                )}
-                {p.premium && !isPremium && (
-                  <p className="text-xs blur-sm select-none text-slate-500">Détection automatique de tes tendances comportementales sur la semaine.</p>
-                )}
-                {p.premium && isPremium && (
-                  <p className="text-xs text-slate-500">Détection automatique de tes tendances comportementales sur la semaine.</p>
+        {(loading || data?.has_data) && (
+          <div className="mb-5">
+            <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-3">Patterns détectés</p>
+            {loading ? (
+              <div className="space-y-2">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="h-14 rounded-xl border border-navy-700 bg-navy-800 animate-pulse" />
+                ))}
+              </div>
+            ) : data?.patterns.length ? (
+              <div className="space-y-2">
+                {data.patterns.map(p => {
+                  const locked = p.premium && !isPremium
+                  return (
+                    <div key={p.label} className={`rounded-xl border border-navy-700 bg-navy-800 px-4 py-3.5 ${locked ? 'opacity-60' : ''}`}>
+                      <div className="flex items-center gap-2 mb-0.5">
+                        {!locked && <CheckCircle size={13} className="text-periwinkle-400 flex-shrink-0" />}
+                        {locked && <Lock size={13} className="text-amber-400 flex-shrink-0" />}
+                        <p className={`text-sm font-semibold ${locked ? 'blur-sm select-none text-slate-300' : 'text-white'}`}>
+                          {p.label}
+                        </p>
+                        {!locked && (
+                          <span className="ml-auto text-xs text-slate-600">{p.count}x ce mois</span>
+                        )}
+                      </div>
+                      <p className={`text-xs text-slate-500 leading-relaxed ml-5 ${locked ? 'blur-sm select-none' : ''}`}>
+                        {p.desc}
+                      </p>
+                    </div>
+                  )
+                })}
+
+                {!isPremium && (
+                  <div className="flex items-center gap-2 px-4 py-3 rounded-xl border border-amber-500/20 bg-navy-800 text-xs text-slate-400">
+                    <Lock size={12} className="text-amber-400 flex-shrink-0" />
+                    <span><strong className="text-amber-400">Patterns avancés · Premium</strong> — Détection automatique de tes tendances</span>
+                  </div>
                 )}
               </div>
-            ))}
+            ) : (
+              <p className="text-sm text-slate-500 italic px-1">Fais quelques check-ins pour voir tes patterns.</p>
+            )}
           </div>
+        )}
 
-          {/* Patterns premium overlay */}
-          {!isPremium && (
-            <div className="mt-2 flex items-center justify-between px-4 py-3 rounded-xl border border-amber-500/20 bg-navy-800">
-              <div className="flex items-center gap-2 text-xs text-slate-400">
-                <Lock size={12} className="text-amber-400" />
-                <span><strong className="text-amber-400">Patterns avancés · Premium</strong> — Détection automatique de tes tendances</span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Weekly note — premium */}
+        {/* Weekly AI note */}
         <div className="rounded-xl border border-navy-700 bg-navy-800 px-5 py-4">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
@@ -166,10 +235,7 @@ export default function Insights() {
               >
                 {loadingNote ? (
                   <>
-                    <svg className="animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                    </svg>
+                    <div className="w-3 h-3 border-2 border-periwinkle-400/30 border-t-periwinkle-400 rounded-full animate-spin" />
                     Génération...
                   </>
                 ) : (
@@ -192,7 +258,6 @@ export default function Insights() {
           )}
         </div>
       </main>
-
     </div>
   )
 }
