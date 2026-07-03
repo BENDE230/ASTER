@@ -8,6 +8,21 @@
   }
 }
 
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition {
+  animation: page-enter 0.2s ease-out;
+}
+
 @layer base {
   body {
     @apply bg-navy-950 text-white font-sans antialiased;

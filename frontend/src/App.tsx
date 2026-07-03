@@ -27,18 +27,20 @@ function AppLayout() {
 
   return (
     <>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/space-ready" element={<SpaceReady />} />
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/checkin" element={<ProtectedRoute><CheckIn /></ProtectedRoute>} />
-        <Route path="/journal" element={<ProtectedRoute><Journal /></ProtectedRoute>} />
-        <Route path="/protocols" element={<ProtectedRoute><Protocols /></ProtectedRoute>} />
-        <Route path="/insights" element={<ProtectedRoute><Insights /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <div key={location.pathname} className="page-transition">
+        <Routes location={location}>
+          <Route path="/" element={<Landing />} />
+          <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/space-ready" element={<SpaceReady />} />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/checkin" element={<ProtectedRoute><CheckIn /></ProtectedRoute>} />
+          <Route path="/journal" element={<ProtectedRoute><Journal /></ProtectedRoute>} />
+          <Route path="/protocols" element={<ProtectedRoute><Protocols /></ProtectedRoute>} />
+          <Route path="/insights" element={<ProtectedRoute><Insights /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
       {showBottomNav && <BottomNav />}
     </>
   )
