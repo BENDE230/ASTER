@@ -161,10 +161,9 @@ export default function Insights() {
               </div>
             )}
             {!isPremium && (
-              <>
-                <TrendingUp size={20} className="text-slate-600 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-30" />
-                <PremiumGate title="Graphique Premium" className="absolute inset-4" />
-              </>
+              <div className="absolute inset-0 flex items-center justify-center p-4">
+                <PremiumGate title="Graphique Premium" className="w-full" />
+              </div>
             )}
           </div>
         </div>
