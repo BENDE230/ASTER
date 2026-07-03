@@ -22,12 +22,12 @@ interface Stats {
 }
 
 const FEELING_ICON: Record<string, string> = {
-  'Je suranalyse':      '⏱',
-  'Je suis figé·e':    '○',
-  'Je suis vidé·e':    '≈',
-  'Hypervigilance':    '⚠',
-  'Je me sens trop':   '♡',
-  'Saturation mentale':'⚡',
+  'Je suranalyse':      '🌀',
+  'Je suis figé·e':    '🧊',
+  'Je suis vidé·e':    '🪫',
+  'Hypervigilance':    '🔺',
+  'Je me sens trop':   '🌊',
+  'Saturation mentale':'🧠',
 }
 
 function getGreeting() {
@@ -36,6 +36,13 @@ function getGreeting() {
   if (h < 12) return 'Bonjour'
   if (h < 18) return 'Bon après-midi'
   return 'Bonne soirée'
+}
+
+function getJournalLabel() {
+  const h = new Date().getHours()
+  if (h < 12) return { title: 'Journal du matin', subtitle: 'Écrire comment tu commences la journée' }
+  if (h < 18) return { title: 'Journal de l\'après-midi', subtitle: 'Déposer ce qui s\'est passé aujourd\'hui' }
+  return { title: 'Journal du soir', subtitle: 'Écrire ce qui reste avant de dormir' }
 }
 
 export default function Dashboard() {
@@ -47,6 +54,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState<Stats>({ streak: 0, total_this_month: 0, week: [], recent: [] })
   const [checkedInToday, setCheckedInToday] = useState(false)
   const [isPremium, setIsPremium] = useState(false)
+  const journalLabel = getJournalLabel()
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -100,14 +108,27 @@ export default function Dashboard() {
         {/* Check-in CTA */}
         <button
           onClick={() => navigate('/checkin')}
-          className="w-full flex items-center gap-4 px-5 py-4 rounded-xl border border-navy-700 bg-navy-800 hover:bg-navy-700 transition-colors mb-5 text-left"
+          className={`w-full flex items-center gap-4 px-5 py-4 rounded-xl border transition-colors mb-5 text-left ${
+            checkedInToday
+              ? 'border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/8'
+              : 'border-navy-700 bg-navy-800 hover:bg-navy-700'
+          }`}
         >
-          <div className="w-10 h-10 rounded-xl bg-periwinkle-500/15 flex items-center justify-center flex-shrink-0">
-            <Clock size={18} className="text-periwinkle-400" />
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+            checkedInToday ? 'bg-emerald-500/15' : 'bg-periwinkle-500/15'
+          }`}>
+            {checkedInToday
+              ? <span className="text-lg">✓</span>
+              : <Clock size={18} className="text-periwinkle-400" />
+            }
           </div>
           <div className="flex-1">
-            <p className="text-sm font-semibold text-white">Comment te sens-tu maintenant ?</p>
-            <p className="text-xs text-slate-500 mt-0.5">30 secondes · Protocole personnalisé ensuite</p>
+            <p className="text-sm font-semibold text-white">
+              {checkedInToday ? 'Check-in du jour complété' : 'Comment te sens-tu maintenant ?'}
+            </p>
+            <p className="text-xs text-slate-500 mt-0.5">
+              {checkedInToday ? 'Tu peux en faire un nouveau si tu le souhaites' : '30 secondes · Protocole personnalisé ensuite'}
+            </p>
           </div>
           <ChevronRight size={16} className="text-slate-500" />
         </button>
@@ -115,12 +136,12 @@ export default function Dashboard() {
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3 mb-5">
           {[
-            { icon: Flame,    value: stats.streak,           label: 'Jours de suite' },
-            { icon: Clock,    value: stats.total_this_month, label: 'Check-ins ce mois' },
-            { icon: BookOpen, value: 0,                      label: 'Protocoles faits' },
-          ].map(({ icon: Icon, value, label }) => (
+            { emoji: '🔥', value: stats.streak,           label: 'Jours de suite' },
+            { emoji: '📊', value: stats.total_this_month, label: 'Check-ins ce mois' },
+            { emoji: '📓', value: stats.recent?.length ?? 0, label: 'Activités récentes' },
+          ].map(({ emoji, value, label }) => (
             <div key={label} className="stat-card">
-              <Icon size={16} className="text-slate-500" />
+              <span className="text-base">{emoji}</span>
               <p className="text-2xl font-bold text-white mt-1">{value}</p>
               <p className="text-xs text-slate-500">{label}</p>
             </div>
@@ -185,8 +206,8 @@ export default function Dashboard() {
             <BookOpen size={18} className="text-slate-400" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-semibold text-white">Journal du soir</p>
-            <p className="text-xs text-slate-500">Écrire ce qui reste avant de dormir</p>
+            <p className="text-sm font-semibold text-white">{journalLabel.title}</p>
+            <p className="text-xs text-slate-500">{journalLabel.subtitle}</p>
           </div>
           <ChevronRight size={16} className="text-slate-500" />
         </button>

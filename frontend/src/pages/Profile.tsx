@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useUser, useClerk } from '@clerk/clerk-react'
+import { useNavigate } from 'react-router-dom'
 import { LogOut, Crown, CreditCard, Calendar, ChevronRight, User, Shield, ExternalLink, Bell, BellOff, Send } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
 import { useApi } from '../hooks/useApi'
@@ -27,6 +28,7 @@ export default function Profile() {
   const { user } = useUser()
   const { signOut } = useClerk()
   const { get, post, patch } = useApi()
+  const navigate = useNavigate()
   const [sub, setSub] = useState<Subscription | null>(null)
   const [loadingSub, setLoadingSub] = useState(true)
   const [loadingPortal, setLoadingPortal] = useState(false)
@@ -114,7 +116,7 @@ export default function Profile() {
 
       <main className="md:ml-[210px] flex-1 px-4 md:px-8 py-6 md:py-8 max-w-xl pb-24 md:pb-8">
         <p className="text-xs text-slate-500 mb-2 font-medium">Mon compte</p>
-        <h1 className="text-3xl font-bold text-white mb-7">Profil</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-white mb-7">Profil</h1>
 
         {/* Avatar + infos */}
         <div className="rounded-xl border border-navy-700 bg-navy-800 px-5 py-5 mb-4 flex items-center gap-4">
@@ -203,12 +205,12 @@ export default function Profile() {
                 <span className="text-sm text-slate-400">Essai gratuit</span>
               </div>
               <button
-                onClick={() => window.location.href = '/dashboard'}
+                onClick={() => navigate('/dashboard')}
                 className="w-full flex items-center justify-between px-4 py-3 rounded-lg bg-periwinkle-500 hover:bg-periwinkle-400 transition-colors"
               >
                 <div className="flex items-center gap-2 text-sm font-semibold text-white">
                   <Crown size={14} />
-                  Passer à Premium
+                  Voir les offres Premium
                 </div>
                 <ChevronRight size={14} className="text-white/70" />
               </button>
