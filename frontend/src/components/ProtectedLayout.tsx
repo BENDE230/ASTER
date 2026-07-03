@@ -29,6 +29,8 @@ export default function ProtectedLayout() {
   useEffect(() => {
     if (Page) {
       setVisited(prev => (prev.includes(path) ? prev : [...prev, path]))
+      // signal the newly-visible page to refresh if its cache was invalidated
+      window.dispatchEvent(new CustomEvent(`aster:refresh:${path}`))
     }
   }, [path, Page])
 
