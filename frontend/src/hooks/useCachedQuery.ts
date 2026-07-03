@@ -23,9 +23,15 @@ export function useCachedQuery<T>(path: string, defaultValue: T) {
   }, [fetchData])
 
   useEffect(() => {
-    const handler = () => fetchData()
-    window.addEventListener(`aster:refresh:${path}`, handler)
-    return () => window.removeEventListener(`aster:refresh:${path}`, handler)
+    const handler = (e: Event) => {
+      const invalidatedPath = (e as CustomEvent).detail
+      // re-fetch if all cache was cleared, or if our specific path was invalidated
+      if (invalidatedPath === null || invalidatedPath === path) {
+        fetchData()
+      }
+    }
+    window.addEventListener('aster:cache-invalidated', handler)
+    return () => window.removeEventListener('aster:cache-invalidated', handler)
   }, [path, fetchData])
 
   const refresh = useCallback(() => {

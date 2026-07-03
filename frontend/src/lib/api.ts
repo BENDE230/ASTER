@@ -45,6 +45,7 @@ export function invalidateCache(path?: string) {
   } else {
     cache.clear()
   }
+  window.dispatchEvent(new CustomEvent('aster:cache-invalidated', { detail: path ?? null }))
 }
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
