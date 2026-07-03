@@ -86,8 +86,9 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchStats(true)
-    window.addEventListener('focus', fetchStats)
-    return () => window.removeEventListener('focus', fetchStats)
+    const onFocus = () => fetchStats()
+    window.addEventListener('focus', onFocus)
+    return () => window.removeEventListener('focus', onFocus)
   }, [])
 
   return (

@@ -4,6 +4,7 @@ import { useUser, useClerk } from '@clerk/clerk-react'
 import { Home, CheckCircle, BookOpen, Shield, Sparkles, Moon, Zap, LogOut, X, UserCircle } from 'lucide-react'
 import { useApi } from '../hooks/useApi'
 import { usePremium } from '../hooks/usePremium'
+import { useToast } from './Toast'
 
 const NAV = [
   { to: '/dashboard',  label: 'Accueil',    icon: Home },
@@ -25,6 +26,7 @@ export default function Sidebar({ trialDaysLeft = 5 }: SidebarProps) {
   const { post } = useApi()
   const isPremium = usePremium()
   const navigate = useNavigate()
+  const toast = useToast()
   const initials = user ? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase() : 'U'
   const [showPlans, setShowPlans] = useState(false)
   const [loading, setLoading] = useState<string | null>(null)
@@ -35,7 +37,7 @@ export default function Sidebar({ trialDaysLeft = 5 }: SidebarProps) {
       const data = await post<{ url: string }>(`/api/stripe/create-checkout?plan=${plan}`, {})
       if (data?.url) window.location.href = data.url
     } catch {
-      alert('Erreur lors de la création du paiement.')
+      toast.error('Impossible de créer le paiement. Réessaie.')
     } finally {
       setLoading(null)
     }

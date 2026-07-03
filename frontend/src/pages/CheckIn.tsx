@@ -4,6 +4,7 @@ import { Clock, CheckCircle2, ArrowRight, RotateCcw, LayoutDashboard } from 'luc
 import Sidebar from '../components/Sidebar'
 import StreakCelebration from '../components/StreakCelebration'
 import { useApi } from '../hooks/useApi'
+import { useToast } from '../components/Toast'
 
 const OPTIONS = [
   { emoji: '🌀', label: 'Je suranalyse',      description: 'Les pensées tournent sans fin.',          protocol: 'ancrage-5-sens' },
@@ -43,6 +44,7 @@ function formatRelative(iso: string) {
 export default function CheckIn() {
   const navigate = useNavigate()
   const { post, get } = useApi()
+  const toast = useToast()
   const [selected, setSelected] = useState<typeof OPTIONS[number] | null>(null)
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
@@ -64,10 +66,12 @@ export default function CheckIn() {
     setLoading(true)
     try {
       await post('/api/checkins', { feeling: selected.label })
+      toast.success('Check-in enregistré ✓')
     } catch {
       const prev = JSON.parse(localStorage.getItem('aster_checkins') ?? '[]')
       prev.unshift({ feeling: selected.label, date: new Date().toISOString() })
       localStorage.setItem('aster_checkins', JSON.stringify(prev.slice(0, 30)))
+      toast.info('Enregistré localement (hors ligne)')
     } finally {
       setLoading(false)
     }

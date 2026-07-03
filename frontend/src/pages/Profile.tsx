@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { LogOut, Crown, CreditCard, Calendar, ChevronRight, User, Shield, ExternalLink, Bell, BellOff, Send } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
 import { useApi } from '../hooks/useApi'
+import { useToast } from '../components/Toast'
 
 interface Subscription {
   is_premium: boolean
@@ -29,6 +30,7 @@ export default function Profile() {
   const { signOut } = useClerk()
   const { get, post, patch } = useApi()
   const navigate = useNavigate()
+  const toast = useToast()
   const [sub, setSub] = useState<Subscription | null>(null)
   const [loadingSub, setLoadingSub] = useState(true)
   const [loadingPortal, setLoadingPortal] = useState(false)
@@ -72,7 +74,9 @@ export default function Profile() {
         hour: next.hour,
         email: next.email,
       })
-    } catch {} finally {
+    } catch {
+      toast.error('Impossible de sauvegarder les préférences.')
+    } finally {
       setSavingNotif(false)
     }
   }
@@ -84,9 +88,12 @@ export default function Profile() {
     try {
       await post('/api/notifications/test-email', { email: notif.email })
       setTestSent(true)
+      toast.success('Email de test envoyé ✓')
       setTimeout(() => setTestSent(false), 4000)
     } catch (e: unknown) {
-      setTestError(e instanceof Error ? e.message : 'Erreur inconnue')
+      const msg = e instanceof Error ? e.message : 'Erreur inconnue'
+      setTestError(msg)
+      toast.error(`Envoi échoué : ${msg}`)
     } finally {
       setSendingTest(false)
     }
@@ -98,7 +105,7 @@ export default function Profile() {
       const data = await post<{ url: string }>('/api/stripe/portal', {})
       window.location.href = data.url
     } catch {
-      alert("Impossible d'accéder au portail. Contacte le support.")
+      toast.error("Impossible d'accéder au portail. Contacte le support.")
     } finally {
       setLoadingPortal(false)
     }

@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar'
 import { SkeletonEntry } from '../components/Skeleton'
 import { useApi } from '../hooks/useApi'
 import { usePremium } from '../hooks/usePremium'
+import { useToast } from '../components/Toast'
 
 interface AiAnalysis {
   emotion: string
@@ -40,6 +41,7 @@ function EntryCard({
   const [analyzing, setAnalyzing] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const { post, patch, delete: del } = useApi()
+  const toast = useToast()
 
   const handleAnalyze = async () => {
     if (!isPremium) return
@@ -48,8 +50,9 @@ function EntryCard({
       const result = await post<AiAnalysis>('/api/ai/analyze-journal', { content: entry.content })
       await patch(`/api/journal/${entry.id}/analysis`, { analysis: result })
       onAnalyzed(entry.id, result)
+      toast.success('Analyse IA enregistrée ✓')
     } catch {
-      // silent fail
+      toast.error("Analyse impossible. Réessaie dans un instant.")
     } finally {
       setAnalyzing(false)
     }
@@ -64,8 +67,9 @@ function EntryCard({
     try {
       await del(`/api/journal/${entry.id}`)
       onDelete(entry.id)
+      toast.success('Entrée supprimée')
     } catch {
-      // silent fail
+      toast.error("Impossible de supprimer l'entrée.")
     }
   }
 
@@ -161,6 +165,7 @@ export default function Journal() {
 
   const { get, post, patch } = useApi()
   const isPremium = usePremium()
+  const toast = useToast()
 
   const today = new Date().toLocaleDateString('fr-FR', {
     weekday: 'long', day: 'numeric', month: 'long',
@@ -198,12 +203,14 @@ export default function Journal() {
       setNewEntryId(result.id)
       setContent('')
       setAnalysis(null)
+      toast.success('Entrée enregistrée ✓')
     } catch {
       // fallback to localStorage
       const prev = JSON.parse(localStorage.getItem('aster_journal') ?? '[]')
       prev.unshift({ date: new Date().toISOString(), content })
       localStorage.setItem('aster_journal', JSON.stringify(prev.slice(0, 50)))
       setContent('')
+      toast.info('Enregistré localement (hors ligne)')
     } finally {
       setSaving(false)
     }
@@ -219,8 +226,10 @@ export default function Journal() {
     try {
       const result = await post<AiAnalysis>('/api/ai/analyze-journal', { content })
       setAnalysis(result)
+      toast.success('Analyse IA terminée ✓')
     } catch {
       setAnalyzeError("Une erreur s'est produite. Réessaie dans un instant.")
+      toast.error("Analyse IA impossible. Réessaie dans un instant.")
     } finally {
       setAnalyzing(false)
     }

@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@clerk/clerk-react'
+import { ToastProvider } from './components/Toast'
 import Landing from './pages/Landing'
 import Onboarding from './pages/Onboarding'
 import SpaceReady from './pages/SpaceReady'
@@ -46,7 +47,9 @@ function AppLayout() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AppLayout />
+      <ToastProvider>
+        <AppLayout />
+      </ToastProvider>
     </BrowserRouter>
   )
 }
