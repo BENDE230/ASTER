@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useUser } from '@clerk/clerk-react'
-import { Flame, Clock, BookOpen, TrendingUp, ChevronRight, HelpCircle } from 'lucide-react'
+import { Flame, Clock, BookOpen, TrendingUp, ChevronRight } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
 import { useApi } from '../hooks/useApi'
 
@@ -216,9 +216,6 @@ export default function Dashboard() {
         </div>
       </main>
 
-      <button className="fixed bottom-20 md:bottom-5 right-5 w-9 h-9 rounded-full bg-navy-800 border border-navy-700 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
-        <HelpCircle size={16} />
-      </button>
     </div>
   )
 }

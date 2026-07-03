@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Lock, HelpCircle, Sparkles, BookOpen, Brain, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
+import { Lock, Sparkles, BookOpen, Brain, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
 import { useApi } from '../hooks/useApi'
 import { usePremium } from '../hooks/usePremium'
@@ -37,6 +37,7 @@ function EntryCard({
 }) {
   const [expanded, setExpanded] = useState(false)
   const [analyzing, setAnalyzing] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const { post, patch, delete: del } = useApi()
 
   const handleAnalyze = async () => {
@@ -54,7 +55,11 @@ function EntryCard({
   }
 
   const handleDelete = async () => {
-    if (!confirm('Supprimer cette entrée ?')) return
+    if (!confirmDelete) {
+      setConfirmDelete(true)
+      setTimeout(() => setConfirmDelete(false), 3000)
+      return
+    }
     try {
       await del(`/api/journal/${entry.id}`)
       onDelete(entry.id)
@@ -89,9 +94,14 @@ function EntryCard({
           )}
           <button
             onClick={handleDelete}
-            className="p-1 rounded text-slate-600 hover:text-red-400 transition-colors"
+            className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-xs transition-colors ${
+              confirmDelete
+                ? 'text-red-400 bg-red-400/10 font-medium'
+                : 'text-slate-600 hover:text-red-400'
+            }`}
           >
             <Trash2 size={12} />
+            {confirmDelete && <span>Confirmer</span>}
           </button>
           <button
             onClick={() => setExpanded(e => !e)}
@@ -229,7 +239,7 @@ export default function Journal() {
 
       <main className="md:ml-[210px] flex-1 px-4 md:px-8 py-6 md:py-8 max-w-2xl pb-24 md:pb-8">
         <p className="text-xs text-slate-500 mb-2 font-medium">Journal émotionnel</p>
-        <h1 className="text-3xl font-bold text-white mb-1">Écris ce que tu ressens.</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">Écris ce que tu ressens.</h1>
         <p className="text-sm text-slate-400 mb-7">Sans filtre, sans jugement. C'est ton espace.</p>
 
         {/* Textarea */}
@@ -384,9 +394,6 @@ export default function Journal() {
         </div>
       </main>
 
-      <button className="fixed bottom-5 right-5 w-9 h-9 rounded-full bg-navy-800 border border-navy-700 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
-        <HelpCircle size={16} />
-      </button>
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Lock, HelpCircle, TrendingUp, Sparkles } from 'lucide-react'
+import { Lock, TrendingUp, Sparkles } from 'lucide-react'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import Sidebar from '../components/Sidebar'
 import PremiumGate from '../components/PremiumGate'
@@ -18,6 +18,17 @@ const PATTERNS = [
   { label: 'Fatigue de régulation', description: null, premium: true },
   { label: 'Surcharge sociale', description: null, premium: true },
 ]
+
+function getWeekRange() {
+  const now = new Date()
+  const day = now.getDay() || 7
+  const monday = new Date(now)
+  monday.setDate(now.getDate() - day + 1)
+  const sunday = new Date(monday)
+  sunday.setDate(monday.getDate() + 6)
+  const fmt = (d: Date) => d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })
+  return `${fmt(monday)} – ${fmt(sunday)}`
+}
 
 export default function Insights() {
   const isPremium = usePremium()
@@ -46,11 +57,11 @@ export default function Insights() {
       <Sidebar />
 
       <main className="md:ml-[210px] flex-1 px-4 md:px-8 py-6 md:py-8 max-w-3xl pb-24 md:pb-8">
-        <h1 className="text-3xl font-bold text-white mb-1">Tes patterns cette semaine.</h1>
-        <p className="text-sm text-slate-500 mb-7">14 juin – 19 juin · 8 entrées analysées</p>
+        <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">Tes patterns cette semaine.</h1>
+        <p className="text-sm text-slate-500 mb-7">{getWeekRange()}</p>
 
         {/* Charts row */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           {/* Donut chart — free */}
           <div className="rounded-xl border border-navy-700 bg-navy-800 p-5">
             <p className="section-title mb-4">États dominants</p>
@@ -182,9 +193,6 @@ export default function Insights() {
         </div>
       </main>
 
-      <button className="fixed bottom-5 right-5 w-9 h-9 rounded-full bg-navy-800 border border-navy-700 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
-        <HelpCircle size={16} />
-      </button>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Clock, Lock, HelpCircle, X, ChevronRight, CheckCircle2, Play, Pause } from 'lucide-react'
+import { Clock, Lock, X, ChevronRight, CheckCircle2, Play, Pause } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
 import { usePremium } from '../hooks/usePremium'
 
@@ -669,7 +669,7 @@ export default function Protocols() {
 
       <main className="md:ml-[210px] flex-1 px-4 md:px-8 py-6 md:py-8 max-w-3xl pb-24 md:pb-8">
         <p className="text-xs text-slate-500 mb-2 font-medium">Bibliothèque</p>
-        <h1 className="text-3xl font-bold text-white mb-1">Protocoles de régulation.</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">Protocoles de régulation.</h1>
         <p className="text-sm text-slate-400 mb-6">
           {isPremium ? (
             <><strong className="text-white">12 protocoles</strong> disponibles — accès complet</>
@@ -746,9 +746,6 @@ export default function Protocols() {
         />
       )}
 
-      <button className="fixed bottom-5 right-5 w-9 h-9 rounded-full bg-navy-800 border border-navy-700 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
-        <HelpCircle size={16} />
-      </button>
     </div>
   )
 }
