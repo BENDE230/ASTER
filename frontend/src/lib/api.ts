@@ -2,6 +2,26 @@ const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 
 type RequestOptions = RequestInit & { token?: string }
 
+// Simple in-memory GET cache — 30s TTL
+const cache = new Map<string, { data: unknown; ts: number }>()
+const CACHE_TTL = 30_000
+
+function getCached<T>(key: string): T | null {
+  const entry = cache.get(key)
+  if (!entry) return null
+  if (Date.now() - entry.ts > CACHE_TTL) { cache.delete(key); return null }
+  return entry.data as T
+}
+
+function setCached(key: string, data: unknown) {
+  cache.set(key, { data, ts: Date.now() })
+}
+
+export function invalidateCache(path?: string) {
+  if (path) cache.delete(path)
+  else cache.clear()
+}
+
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { token, ...init } = options
 
@@ -25,8 +45,15 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 }
 
 export const api = {
-  get: <T>(path: string, token?: string) =>
-    request<T>(path, { method: 'GET', token }),
+  get: <T>(path: string, token?: string): Promise<T> => {
+    const cacheKey = `${token?.slice(-8) ?? 'anon'}:${path}`
+    const cached = getCached<T>(cacheKey)
+    if (cached) return Promise.resolve(cached)
+    return request<T>(path, { method: 'GET', token }).then(data => {
+      setCached(cacheKey, data)
+      return data
+    })
+  },
 
   post: <T>(path: string, body: unknown, token?: string) =>
     request<T>(path, { method: 'POST', body: JSON.stringify(body), token }),

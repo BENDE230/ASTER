@@ -4,6 +4,7 @@ import { Clock, CheckCircle2, ArrowRight, RotateCcw, LayoutDashboard } from 'luc
 import Sidebar from '../components/Sidebar'
 import StreakCelebration from '../components/StreakCelebration'
 import { useApi } from '../hooks/useApi'
+import { invalidateCache } from '../lib/api'
 import { useToast } from '../components/Toast'
 
 const OPTIONS = [
@@ -66,6 +67,7 @@ export default function CheckIn() {
     setLoading(true)
     try {
       await post('/api/checkins', { feeling: selected.label })
+      invalidateCache() // refresh stats everywhere
       toast.success('Check-in enregistré ✓')
     } catch {
       const prev = JSON.parse(localStorage.getItem('aster_checkins') ?? '[]')
