@@ -1105,15 +1105,15 @@ export default function Protocols() {
         <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">Protocoles de régulation.</h1>
         <p className="text-sm text-slate-400 mb-6">
           {isPremium ? (
-            <><strong className="text-white">24 protocoles</strong> disponibles — accès complet</>
+            <><strong className="text-white">{PROTOCOLS.length} protocoles</strong> disponibles — accès complet</>
           ) : (
-            <><strong className="text-white">4 protocoles</strong> disponibles ·{' '}
+            <><strong className="text-white">{PROTOCOLS.filter(p => !p.premium).length} protocoles</strong> disponibles ·{' '}
             <button
               type="button"
               onClick={() => navigate('/profile')}
               className="text-periwinkle-400 hover:text-periwinkle-300 underline underline-offset-2 transition-colors"
             >
-              Débloquer les 20 en Premium
+              Débloquer les {PROTOCOLS.filter(p => p.premium).length} en Premium
             </button></>
           )}
         </p>
