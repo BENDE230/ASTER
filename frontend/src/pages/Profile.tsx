@@ -5,6 +5,7 @@ import { LogOut, Crown, CreditCard, Calendar, ChevronRight, User, Shield, Extern
 import { useApi } from '../hooks/useApi'
 import { useCachedQuery } from '../hooks/useCachedQuery'
 import { useToast } from '../components/Toast'
+import { AnalyticsEvents, track } from '../lib/analytics'
 
 interface Subscription {
   is_premium: boolean
@@ -44,6 +45,21 @@ export default function Profile() {
     setNotifRaw(typeof updater === 'function' ? updater(notifRaw) : updater)
   }
   const [loadingPortal, setLoadingPortal] = useState(false)
+  const [loadingPlan, setLoadingPlan] = useState<'monthly' | 'yearly' | null>(null)
+
+  const handleUpgrade = async (plan: 'monthly' | 'yearly') => {
+    if (loadingPlan) return
+    setLoadingPlan(plan)
+    track(AnalyticsEvents.PREMIUM_CHECKOUT_CLICKED, { plan, source: 'profile' })
+    try {
+      const data = await post<{ url: string }>(`/api/stripe/create-checkout?plan=${plan}`, {})
+      if (data?.url) window.location.href = data.url
+    } catch {
+      toast.error('Impossible de créer le paiement. Réessaie.')
+    } finally {
+      setLoadingPlan(null)
+    }
+  }
   const [savingNotif, setSavingNotif] = useState(false)
   const [sendingTest, setSendingTest] = useState(false)
   const [testSent, setTestSent] = useState(false)
@@ -185,23 +201,46 @@ export default function Profile() {
               </div>
             </>
           ) : (
-            <div className="px-5 py-4">
-              <div className="flex items-center justify-between mb-3">
+            <div className="px-5 py-5 space-y-3">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm text-slate-400">
                   <User size={14} />
                   Plan actif
                 </div>
                 <span className="text-sm text-slate-400">Essai gratuit</span>
               </div>
+
+              {/* Yearly — highlighted */}
               <button
-                onClick={() => navigate('/dashboard')}
-                className="w-full flex items-center justify-between px-4 py-3 rounded-lg bg-periwinkle-500 hover:bg-periwinkle-400 transition-colors"
+                type="button"
+                onClick={() => handleUpgrade('yearly')}
+                disabled={loadingPlan !== null}
+                className="w-full rounded-xl bg-periwinkle-500 hover:bg-periwinkle-400 disabled:opacity-60 transition-colors p-4 text-left relative"
               >
-                <div className="flex items-center gap-2 text-sm font-semibold text-white">
-                  <Crown size={14} />
-                  Voir les offres Premium
+                <div className="absolute -top-2.5 left-4 bg-amber-400 text-navy-950 text-xs font-bold px-2 py-0.5 rounded-full">
+                  Meilleure offre
                 </div>
-                <ChevronRight size={14} className="text-white/70" />
+                <div className="flex items-center justify-between mb-0.5">
+                  <span className="text-sm font-bold text-white flex items-center gap-1.5"><Crown size={13} />Annuel</span>
+                  <span className="text-sm font-bold text-white">299 € / an</span>
+                </div>
+                <p className="text-xs text-white/70">Soit 24,90 € / mois · économisez 36 %</p>
+                {loadingPlan === 'yearly' && <p className="text-xs text-white/80 mt-1">Redirection vers le paiement...</p>}
+              </button>
+
+              {/* Monthly */}
+              <button
+                type="button"
+                onClick={() => handleUpgrade('monthly')}
+                disabled={loadingPlan !== null}
+                className="w-full rounded-xl border border-navy-600 bg-navy-800 hover:bg-navy-700 disabled:opacity-60 transition-colors p-4 text-left"
+              >
+                <div className="flex items-center justify-between mb-0.5">
+                  <span className="text-sm font-semibold text-white">Mensuel</span>
+                  <span className="text-sm font-semibold text-periwinkle-400">39 € / mois</span>
+                </div>
+                <p className="text-xs text-slate-500">Sans engagement · résiliable à tout moment</p>
+                {loadingPlan === 'monthly' && <p className="text-xs text-periwinkle-400 mt-1">Redirection vers le paiement...</p>}
               </button>
             </div>
           )}
