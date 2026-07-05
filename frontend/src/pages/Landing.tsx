@@ -27,7 +27,7 @@ const FEATURES = [
     color: 'text-blue-400',
     bg: 'bg-blue-400/10 border-blue-400/20',
     title: '24 protocoles guidés',
-    desc: 'TCC, cohérence cardiaque, ACT, NSDR, IFS... 24 exercices cliniquement fondés, guidés pas à pas.',
+    desc: 'Respiration, ancrage, sommeil, gestion du stress... 24 exercices guidés pas à pas pour retrouver ton calme.',
   },
   {
     icon: Brain,
@@ -134,7 +134,7 @@ const PLANS = [
     badge: null,
     features: [
       'Check-in quotidien illimité',
-      '24 protocoles guidés (TCC, ACT, NSDR...)',
+      '24 protocoles guidés (Respiration, Sommeil...)',
       'Analyse IA du journal',
       'Historique de journal complet',
       'Insights & patterns avancés',
