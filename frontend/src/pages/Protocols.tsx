@@ -1080,9 +1080,12 @@ export default function Protocols() {
     }
   }, [searchParams, isPremium])
 
-  const filtered = activeCategory === 'Tous'
+  const allFiltered = activeCategory === 'Tous'
     ? PROTOCOLS
     : PROTOCOLS.filter(p => p.category === activeCategory)
+
+  const freeProtocols = allFiltered.filter(p => !p.premium)
+  const premiumProtocols = allFiltered.filter(p => p.premium)
 
   const handleClick = (p: Protocol) => {
     if (p.premium && !isPremium) return
@@ -1132,45 +1135,96 @@ export default function Protocols() {
           ))}
         </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-2 gap-3">
-          {filtered.map(p => {
-            const locked = p.premium && !isPremium
-            return (
-              <button
-                key={p.id}
-                onClick={() => handleClick(p)}
-                disabled={locked}
-                className={`text-left rounded-xl border p-5 transition-all ${
-                  locked
-                    ? 'border-navy-700 bg-navy-800/50 opacity-60 cursor-not-allowed'
-                    : 'border-navy-700 bg-navy-800 hover:bg-navy-700 hover:border-navy-600 cursor-pointer'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${TAG_COLORS[p.category] ?? 'text-slate-400 bg-slate-400/10'}`}>
-                    {p.category}
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    {locked && <Lock size={11} className="text-amber-400" />}
-                    {locked && <span className="text-xs text-amber-400 font-medium">Premium</span>}
+        {/* Free protocols */}
+        {freeProtocols.length > 0 && (
+          <>
+            <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-3">
+              Accès libre
+            </p>
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              {freeProtocols.map(p => (
+                <button
+                  key={p.id}
+                  onClick={() => handleClick(p)}
+                  className="text-left rounded-xl border border-navy-700 bg-navy-800 hover:bg-navy-700 hover:border-navy-600 cursor-pointer p-5 transition-all"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${TAG_COLORS[p.category] ?? 'text-slate-400 bg-slate-400/10'}`}>
+                      {p.category}
+                    </span>
                     <span className="text-xs flex items-center gap-1 text-slate-500">
                       <Clock size={11} />{p.duration}
                     </span>
                   </div>
-                </div>
-                <p className="text-sm font-semibold mb-1.5 text-white">{p.title}</p>
-                <p className="text-xs text-slate-500 leading-relaxed">{locked ? 'Disponible en Premium.' : p.description}</p>
-                {!locked && (
+                  <p className="text-sm font-semibold mb-1.5 text-white">{p.title}</p>
+                  <p className="text-xs text-slate-500 leading-relaxed">{p.description}</p>
                   <div className="flex items-center gap-1 mt-3 text-xs text-periwinkle-400">
                     <Play size={10} />
                     <span>{p.steps.length} étapes guidées</span>
                   </div>
-                )}
-              </button>
-            )
-          })}
-        </div>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Premium protocols */}
+        {premiumProtocols.length > 0 && (
+          <>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-semibold uppercase tracking-widest text-amber-400">
+                Premium · {premiumProtocols.length} protocoles
+              </p>
+              {!isPremium && (
+                <button
+                  type="button"
+                  onClick={() => navigate('/profile')}
+                  className="text-xs text-periwinkle-400 hover:text-periwinkle-300 underline underline-offset-2 transition-colors"
+                >
+                  Débloquer
+                </button>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {premiumProtocols.map(p => {
+                const locked = !isPremium
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => locked ? navigate('/profile') : handleClick(p)}
+                    className={`text-left rounded-xl border p-5 transition-all ${
+                      locked
+                        ? 'border-amber-500/20 bg-navy-800/50 cursor-pointer hover:border-amber-500/40 hover:bg-navy-800'
+                        : 'border-navy-700 bg-navy-800 hover:bg-navy-700 hover:border-navy-600 cursor-pointer'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${TAG_COLORS[p.category] ?? 'text-slate-400 bg-slate-400/10'} ${locked ? 'opacity-50' : ''}`}>
+                        {p.category}
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        {locked
+                          ? <><Lock size={11} className="text-amber-400" /><span className="text-xs text-amber-400 font-medium">Premium</span></>
+                          : <span className="text-xs flex items-center gap-1 text-slate-500"><Clock size={11} />{p.duration}</span>
+                        }
+                      </div>
+                    </div>
+                    <p className={`text-sm font-semibold mb-1.5 ${locked ? 'text-slate-400' : 'text-white'}`}>{p.title}</p>
+                    <p className="text-xs text-slate-500 leading-relaxed">
+                      {locked ? p.description : p.description}
+                    </p>
+                    {!locked && (
+                      <div className="flex items-center gap-1 mt-3 text-xs text-periwinkle-400">
+                        <Play size={10} />
+                        <span>{p.steps.length} étapes guidées</span>
+                      </div>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          </>
+        )}
       </main>
 
       {selectedProtocol && (
