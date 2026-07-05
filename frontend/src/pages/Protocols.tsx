@@ -690,7 +690,7 @@ const PROTOCOLS: Protocol[] = [
   {
     id: 'yoga-nidra-court',
     category: 'Retour au corps',
-    duration: '12 min',
+    duration: '10 min',
     title: 'Yoga Nidra · éveil doux',
     description: 'Un état entre veille et sommeil pour restaurer le corps et l\'esprit en profondeur.',
     premium: true,
