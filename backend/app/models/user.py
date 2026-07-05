@@ -18,6 +18,7 @@ class User(Base):
     notifications_enabled = Column(Boolean, default=False)
     notification_hour = Column(Integer, default=9)       # 0-23
     notification_email = Column(String, nullable=True)
+    trial_reminder_sent = Column(Boolean, default=False)
     created_at = Column(DateTime, server_default=func.now())
 
     checkins = relationship("CheckIn", back_populates="user", cascade="all, delete-orphan")

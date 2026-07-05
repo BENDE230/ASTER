@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     resend_api_key: str = ""
     app_url: str = "https://aster-amber.vercel.app"
+    cron_secret: str = ""
 
     class Config:
         env_file = ".env"

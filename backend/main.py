@@ -26,6 +26,7 @@ def run_migrations():
             "ALTER TABLE users ADD COLUMN notifications_enabled BOOLEAN DEFAULT 0",
             "ALTER TABLE users ADD COLUMN notification_hour INTEGER DEFAULT 9",
             "ALTER TABLE users ADD COLUMN notification_email VARCHAR",
+            "ALTER TABLE users ADD COLUMN trial_reminder_sent BOOLEAN DEFAULT 0",
         ]
         for sql in migrations:
             try:
