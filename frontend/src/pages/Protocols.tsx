@@ -19,6 +19,8 @@ interface Step {
   title: string
   instruction: string
   duration?: string
+  hasInput?: boolean
+  inputPlaceholder?: string
 }
 
 interface Protocol {
@@ -277,16 +279,22 @@ const PROTOCOLS: Protocol[] = [
         title: 'Identifie la pensée',
         instruction: 'Quelle est exactement la pensée qui revient ? Écris-la ou formule-la clairement : "Je suis nul·le", "Ça ne marchera jamais", "Tout le monde me juge"... Sois précis·e.',
         duration: '1 min',
+        hasInput: true,
+        inputPlaceholder: 'La pensée qui revient...',
       },
       {
         title: 'Évalue la preuve',
         instruction: 'Pose-toi cette question : quelles sont les preuves concrètes que cette pensée est vraie ? Et quelles sont les preuves qu\'elle est fausse ou exagérée ? Les deux côtés.',
         duration: '1 min 30',
+        hasInput: true,
+        inputPlaceholder: 'Preuves pour / preuves contre...',
       },
       {
         title: 'Cherche l\'alternative',
         instruction: 'Si un·e ami·e te disait cette pensée sur lui/elle, que lui répondrais-tu ? Formule une pensée alternative plus équilibrée — pas forcément positive, juste plus réaliste.',
         duration: '1 min',
+        hasInput: true,
+        inputPlaceholder: 'Une pensée plus juste et réaliste...',
       },
       {
         title: 'Teste l\'impact',
@@ -477,16 +485,22 @@ const PROTOCOLS: Protocol[] = [
         title: 'Commence par le ressenti',
         instruction: 'Écris ce que tu ressens sans te censurer. "Je me sens...", "J\'ai l\'impression de...", "Ce qui me pèse c\'est...". Pas de mise en forme, juste l\'honnêteté brute.',
         duration: '2 min',
+        hasInput: true,
+        inputPlaceholder: 'Je me sens... J\'ai l\'impression de...',
       },
       {
         title: 'Change de perspective',
         instruction: 'Maintenant, imagine un·e ami·e très proche qui vit exactement ce que tu vis. Que lui écrirais-tu ? Commence la lettre par "Cher·e [ton prénom]," et écris-lui comme à cet ami.',
         duration: '3 min',
+        hasInput: true,
+        inputPlaceholder: 'Cher·e [ton prénom],',
       },
       {
         title: 'Reconnais l\'effort',
         instruction: 'Termine en reconnaissant quelque chose que tu fais bien, même en ce moment difficile. Même juste : "Tu continues malgré tout. C\'est courageux."',
         duration: '1 min',
+        hasInput: true,
+        inputPlaceholder: 'Ce que tu fais bien, même là...',
       },
       {
         title: 'Relis à voix basse',
@@ -512,11 +526,15 @@ const PROTOCOLS: Protocol[] = [
         title: 'Vide le mental',
         instruction: 'Prends 2 minutes pour noter tout ce qui t\'inquiète en ce moment — sans filtre ni ordre. Chaque pensée mérite d\'être nommée pour être ensuite posée.',
         duration: '2 min',
+        hasInput: true,
+        inputPlaceholder: 'Tout ce qui tourne dans ta tête...',
       },
       {
         title: 'Trie : contrôlable ou non ?',
         instruction: 'Pour chaque inquiétude : "Est-ce que j\'ai une action concrète à faire là-dessus ?" Si oui, note l\'action. Si non, c\'est une inquiétude sans prise — tu peux la lâcher.',
         duration: '3 min',
+        hasInput: true,
+        inputPlaceholder: 'Actions concrètes à faire...',
       },
       {
         title: 'Le contrat avec ton esprit',
@@ -859,16 +877,22 @@ const PROTOCOLS: Protocol[] = [
         title: 'Les moments qui comptent',
         instruction: 'Pense à 3 moments de ta vie où tu t\'es senti·e vraiment vivant·e, dans ton élément, fier·e ou en paix. Pas forcément des grands événements — parfois c\'est une conversation, un projet, un service rendu.',
         duration: '2 min',
+        hasInput: true,
+        inputPlaceholder: '1. ...\n2. ...\n3. ...',
       },
       {
         title: 'Qu\'est-ce qui était présent ?',
         instruction: 'Pour chacun de ces moments : qu\'est-ce qui le rendait précieux ? La liberté ? La connexion ? La création ? L\'utilité aux autres ? La vérité ? Note les mots qui viennent naturellement.',
         duration: '3 min',
+        hasInput: true,
+        inputPlaceholder: 'Les mots qui viennent...',
       },
       {
         title: 'Tes 3 valeurs clés',
         instruction: 'Parmi les mots notés, lesquels reviennent ? Lesquels font monter quelque chose dans ton ventre ? Choisis 3 valeurs essentielles. Pas celles que tu devrais avoir — celles qui sont vraiment là.',
         duration: '2 min',
+        hasInput: true,
+        inputPlaceholder: 'Mes 3 valeurs : ...',
       },
       {
         title: 'Le test de vie',
@@ -879,6 +903,8 @@ const PROTOCOLS: Protocol[] = [
         title: 'Une action alignée',
         instruction: 'Y a-t-il une seule petite chose que tu pourrais faire cette semaine qui honore l\'une de ces valeurs ? Une chose concrète, réalisable. Note-la ou retiens-la.',
         duration: '1 min',
+        hasInput: true,
+        inputPlaceholder: 'Cette semaine, je vais...',
       },
     ],
     closing: 'Tes valeurs ne disparaissent pas — elles attendent que tu les réécoutes.',
@@ -965,6 +991,7 @@ function ProtocolModal({ protocol, onClose }: { protocol: Protocol; onClose: () 
   const [currentStep, setCurrentStep] = useState(0)
   const [completed, setCompleted] = useState(false)
   const [running, setRunning] = useState(false)
+  const [stepNotes, setStepNotes] = useState<Record<number, string>>({})
 
   const step = protocol.steps[currentStep]
   const isLast = currentStep === protocol.steps.length - 1
@@ -1062,9 +1089,19 @@ function ProtocolModal({ protocol, onClose }: { protocol: Protocol; onClose: () 
                   )}
                 </div>
 
-                <div className="rounded-xl bg-navy-800 border border-navy-700 px-4 py-4 mb-5">
+                <div className="rounded-xl bg-navy-800 border border-navy-700 px-4 py-4 mb-3">
                   <p className="text-sm text-slate-300 leading-relaxed">{step.instruction}</p>
                 </div>
+
+                {step.hasInput && (
+                  <textarea
+                    value={stepNotes[currentStep] ?? ''}
+                    onChange={e => setStepNotes(prev => ({ ...prev, [currentStep]: e.target.value }))}
+                    placeholder={step.inputPlaceholder ?? 'Écris ici...'}
+                    rows={4}
+                    className="w-full mb-3 rounded-xl bg-navy-900 border border-navy-600 focus:border-periwinkle-500 focus:outline-none px-4 py-3 text-sm text-slate-200 placeholder:text-slate-600 resize-none transition-colors"
+                  />
+                )}
 
                 <div className="flex gap-3">
                   {currentStep > 0 && (
