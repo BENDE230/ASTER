@@ -1009,7 +1009,7 @@ function ProtocolModal({ protocol, onClose }: { protocol: Protocol; onClose: () 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="w-full max-w-lg bg-navy-900 border border-navy-700 rounded-2xl overflow-hidden shadow-2xl">
+      <div className="w-full max-w-lg bg-navy-900 border border-navy-700 rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex items-start justify-between px-6 py-5 border-b border-navy-700">
           <div>
@@ -1028,7 +1028,7 @@ function ProtocolModal({ protocol, onClose }: { protocol: Protocol; onClose: () 
 
         {completed ? (
           /* Completion screen */
-          <div className="px-6 py-8 text-center">
+          <div className="px-6 py-8 text-center overflow-y-auto">
             <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 size={26} className="text-emerald-400" />
             </div>
@@ -1045,7 +1045,7 @@ function ProtocolModal({ protocol, onClose }: { protocol: Protocol; onClose: () 
           <>
             {/* Intro (step 0 not started) or Step view */}
             {currentStep === 0 && !running ? (
-              <div className="px-6 py-5">
+              <div className="px-6 py-5 overflow-y-auto">
                 <div className="rounded-xl bg-navy-800 border border-navy-700 px-4 py-3 mb-4">
                   <p className="text-xs text-slate-500 mb-1">Objectif</p>
                   <p className="text-sm text-slate-300">{protocol.goal}</p>
@@ -1064,7 +1064,7 @@ function ProtocolModal({ protocol, onClose }: { protocol: Protocol; onClose: () 
                 </button>
               </div>
             ) : (
-              <div className="px-6 py-5">
+              <div className="px-6 py-5 overflow-y-auto">
                 {/* Progress bar */}
                 <div className="flex items-center gap-2 mb-5">
                   {protocol.steps.map((_, i) => (
