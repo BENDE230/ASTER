@@ -884,6 +884,44 @@ const PROTOCOLS: Protocol[] = [
     closing: 'Tes valeurs ne disparaissent pas — elles attendent que tu les réécoutes.',
   },
   {
+    id: 'ancrage-emotion',
+    category: 'Sécurité émotionnelle',
+    duration: '5 min',
+    title: 'Accueillir l\'émotion',
+    description: 'Arrête de fuir ce que tu ressens — apprends à l\'accueillir pour le traverser plus vite.',
+    premium: true,
+    goal: 'Réduire la durée et l\'intensité des émotions difficiles en les accueillant plutôt qu\'en les évitant.',
+    when: 'Quand une émotion désagréable monte et que tu as envie de la fuir, la noyer ou la faire taire.',
+    steps: [
+      {
+        title: 'Nomme ce que tu ressens',
+        instruction: 'Pose une main sur ta poitrine ou ton ventre. Dis intérieurement : "En ce moment, je ressens..." et laisse le mot venir. Tristesse, honte, colère, peur, vide... Juste nommer réduit déjà l\'intensité.',
+        duration: '1 min',
+      },
+      {
+        title: 'Localise dans le corps',
+        instruction: 'Où cette émotion siège-t-elle exactement ? Gorge, poitrine, ventre, épaules ? Quelle texture — serrée, lourde, brûlante, creuse ? Décris-la comme si tu la voyais pour la première fois.',
+        duration: '1 min',
+      },
+      {
+        title: 'Respire dedans',
+        instruction: 'Dirige ta respiration vers cet endroit. Inspire en imaginant que tu envoies de l\'espace et de la douceur là-dedans. Expire en relâchant sans forcer. Pas pour faire partir l\'émotion — pour lui faire de la place.',
+        duration: '1 min 30',
+      },
+      {
+        title: 'Dis-lui oui',
+        instruction: 'Dis intérieurement à l\'émotion : "Tu as le droit d\'être là. Je ne te chasse pas." Cette permission paradoxale est ce qui permet aux émotions de bouger. Ce qu\'on accueille se dissout — ce qu\'on combat reste.',
+        duration: '1 min',
+      },
+      {
+        title: 'Observe le changement',
+        instruction: 'Remarque si quelque chose a bougé — même légèrement. L\'émotion est-elle toujours là ? A-t-elle changé de texture, d\'intensité ? Reste dans cet espace encore quelques respirations.',
+        duration: '30 sec',
+      },
+    ],
+    closing: 'Les émotions durent en moyenne 90 secondes quand on les accueille vraiment. C\'est la résistance qui les prolonge.',
+  },
+  {
     id: 'dialogue-parties',
     category: 'Sécurité émotionnelle',
     duration: '8 min',
