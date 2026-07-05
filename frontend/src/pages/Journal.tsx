@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Lock, Sparkles, BookOpen, Brain, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 import { SkeletonEntry } from '../components/Skeleton'
 import { useApi } from '../hooks/useApi'
@@ -160,6 +161,7 @@ function EntryCard({
 }
 
 export default function Journal() {
+  const navigate = useNavigate()
   const [content, setContent] = useState('')
   const [saved, setSaved] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -339,7 +341,11 @@ export default function Journal() {
                 </p>
               </div>
             </div>
-            <button className="ml-4 flex-shrink-0 px-3 py-1.5 rounded-lg bg-periwinkle-500 hover:bg-periwinkle-400 text-white text-xs font-semibold transition-colors">
+            <button
+              type="button"
+              onClick={() => navigate('/profile')}
+              className="ml-4 flex-shrink-0 px-3 py-1.5 rounded-lg bg-periwinkle-500 hover:bg-periwinkle-400 text-white text-xs font-semibold transition-colors"
+            >
               Débloquer
             </button>
           </div>

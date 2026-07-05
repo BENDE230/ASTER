@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { Clock, Lock, X, ChevronRight, CheckCircle2, Play, Pause } from 'lucide-react'
 import { usePremium } from '../hooks/usePremium'
 import { AnalyticsEvents, track } from '../lib/analytics'
@@ -639,6 +639,7 @@ function ProtocolModal({ protocol, onClose }: { protocol: Protocol; onClose: () 
 }
 
 export default function Protocols() {
+  const navigate = useNavigate()
   const [activeCategory, setActiveCategory] = useState('Tous')
   const [selectedProtocol, setSelectedProtocol] = useState<Protocol | null>(null)
   const isPremium = usePremium()
@@ -679,7 +680,11 @@ export default function Protocols() {
             <><strong className="text-white">12 protocoles</strong> disponibles — accès complet</>
           ) : (
             <><strong className="text-white">3 protocoles</strong> disponibles ·{' '}
-            <button className="text-periwinkle-400 hover:text-periwinkle-300 underline underline-offset-2 transition-colors">
+            <button
+              type="button"
+              onClick={() => navigate('/profile')}
+              className="text-periwinkle-400 hover:text-periwinkle-300 underline underline-offset-2 transition-colors"
+            >
               Débloquer les 12 en Premium
             </button></>
           )}
