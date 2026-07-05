@@ -26,8 +26,8 @@ const FEATURES = [
     icon: Shield,
     color: 'text-blue-400',
     bg: 'bg-blue-400/10 border-blue-400/20',
-    title: '12 protocoles guidés',
-    desc: 'Cohérence cardiaque, ancrage, scan corporel, relâchement... Des exercices cliniquement validés.',
+    title: '24 protocoles guidés',
+    desc: 'TCC, cohérence cardiaque, ACT, NSDR, IFS... 24 exercices cliniquement fondés, guidés pas à pas.',
   },
   {
     icon: Brain,
@@ -47,8 +47,8 @@ const FEATURES = [
     icon: Heart,
     color: 'text-pink-400',
     bg: 'bg-pink-400/10 border-pink-400/20',
-    title: 'Rappels bienveillants',
-    desc: 'Un email doux à l\'heure que tu choisis pour ne pas oublier de prendre soin de toi.',
+    title: 'Analyse de journal IA',
+    desc: 'L\'IA lit chaque entrée et identifie ton émotion dominante, ton besoin, et un exercice adapté.',
   },
 ]
 
@@ -118,9 +118,9 @@ const PLANS = [
     highlight: false,
     badge: null,
     features: [
-      '3 protocoles de régulation',
+      '4 protocoles de régulation',
       'Check-in émotionnel quotidien',
-      '1 entrée de journal visible',
+      'Journal (entrée du jour visible)',
       'Statistiques de base',
     ],
     cta: 'Commencer gratuitement',
@@ -134,12 +134,11 @@ const PLANS = [
     badge: null,
     features: [
       'Check-in quotidien illimité',
-      '12 protocoles (Sommeil, Sécurité...)',
+      '24 protocoles guidés (TCC, ACT, NSDR...)',
       'Analyse IA du journal',
-      'Historique complet',
+      'Historique de journal complet',
       'Insights & patterns avancés',
-      'Note de synthèse hebdomadaire',
-      'Rappels email personnalisés',
+      'Note de synthèse IA hebdomadaire',
     ],
     cta: 'Choisir le mensuel',
     sub: 'Résiliable à tout moment',
@@ -164,19 +163,27 @@ const PLANS = [
 const FAQ = [
   {
     q: 'Est-ce une thérapie ?',
-    a: 'Non. ASTER est un outil de bien-être émotionnel, pas un substitut à une thérapie. Si tu traverses une période difficile, nous t\'encourageons à consulter un professionnel.',
+    a: 'Non. ASTER est un outil de bien-être émotionnel, pas un substitut à une thérapie. Si tu traverses une période difficile, nous t\'encourageons à consulter un professionnel de santé mentale.',
+  },
+  {
+    q: 'Que sont les protocoles guidés ?',
+    a: 'Ce sont des exercices structurés, inspirés de techniques cliniques validées : TCC (thérapie cognitive et comportementale), ACT, cohérence cardiaque, NSDR, IFS... Chaque protocole te guide pas à pas, avec une durée claire et un objectif précis.',
   },
   {
     q: 'Mes données sont-elles privées ?',
-    a: 'Oui. Tes entrées de journal et tes check-ins sont privés et ne sont jamais partagés. Tu peux supprimer ton compte à tout moment.',
+    a: 'Oui. Tes entrées de journal et tes check-ins sont strictement privés et ne sont jamais partagés ni vendus. Tu peux supprimer ton compte à tout moment.',
   },
   {
     q: 'Comment fonctionne l\'essai gratuit ?',
-    a: '5 jours complets sans carte bancaire. À la fin de l\'essai, tu choisis si tu veux continuer en Premium. Sinon, tu gardes l\'accès gratuit limité.',
+    a: '5 jours complets, sans carte bancaire. Tu accèdes à 4 protocoles, au check-in quotidien et au journal. À la fin de l\'essai, tu choisis si tu veux continuer en Premium. Sinon, tu gardes un accès limité sans frais.',
   },
   {
     q: 'Puis-je annuler à tout moment ?',
-    a: 'Oui. Sans engagement, sans frais de résiliation. Tu peux annuler depuis ton profil en un clic.',
+    a: 'Oui. Sans engagement ni frais de résiliation. Tu peux annuler depuis ton profil en un clic, via le portail Stripe sécurisé.',
+  },
+  {
+    q: 'ASTER fonctionne-t-il sur mobile ?',
+    a: 'Oui. ASTER est une application web progressive, optimisée pour mobile et desktop. Aucun téléchargement requis — elle fonctionne directement depuis ton navigateur.',
   },
 ]
 
