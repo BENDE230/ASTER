@@ -1004,6 +1004,7 @@ function friendlyVoiceName(v: SpeechSynthesisVoice): string {
 
 function pickDefaultVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
   return (
+    voices.find(v => v.lang.startsWith('fr') && /google/i.test(v.name)) ??
     voices.find(v => v.lang.startsWith('fr') && /denise|hortense|julie|pauline|marie|thomas|claude/i.test(v.name)) ??
     voices.find(v => v.lang.startsWith('fr') && v.localService) ??
     voices.find(v => v.lang.startsWith('fr')) ??
