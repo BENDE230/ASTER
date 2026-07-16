@@ -55,10 +55,10 @@ const FEATURES = [
 ]
 
 const PAIN_POINTS = [
-  { emoji: '😮‍💨', text: 'Tu te sens submergé·e sans savoir pourquoi' },
-  { emoji: '🌀', text: 'Tes pensées tournent en boucle la nuit' },
-  { emoji: '🪫', text: 'Tu es épuisé·e mais tu continues quand même' },
-  { emoji: '🔇', text: 'Tu n\'arrives pas à mettre des mots sur ce que tu ressens' },
+  { emoji: '🌊', text: 'Les émotions débordent et tu ne sais plus comment redescendre' },
+  { emoji: '🔋', text: 'Tu satures vite — bruit, stress, conversations, tout te touche fort' },
+  { emoji: '😶‍🌫️', text: 'Tu te sens trop, trop vite, et tu t\'épuises à tout contenir' },
+  { emoji: '🛟', text: 'Tu as besoin de calme concret, pas de conseils vagues' },
 ]
 
 const STEPS = [
@@ -191,6 +191,10 @@ const FAQ = [
     q: 'Comment vous contacter ?',
     a: `Pour toute question ou problème, écris-nous à ${SUPPORT_EMAIL}. On te répond sous 24–48 h.`,
   },
+  {
+    q: 'ASTER est-il fait pour moi ?',
+    a: 'Si tu te sens souvent submergé·e par tes émotions, que tu satures vite, ou que tu as du mal à redescendre seul·e — oui. ASTER est conçu pour les personnes hypersensibles qui ont besoin d\'un espace simple et concret au quotidien. Ce n\'est pas une thérapie.',
+  },
 ]
 
 export default function Landing() {
@@ -249,7 +253,7 @@ export default function Landing() {
       </nav>
 
       {/* Hero */}
-      <section className="relative pt-28 pb-20 px-5 flex flex-col items-center text-center overflow-hidden">
+      <section className="relative pt-28 pb-16 px-5 flex flex-col items-center text-center overflow-hidden">
         <div className="pointer-events-none absolute inset-0" aria-hidden>
           <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full bg-periwinkle-600/8 blur-3xl" />
         </div>
@@ -257,20 +261,20 @@ export default function Landing() {
         <div className="relative z-10 max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-periwinkle-500/30 bg-periwinkle-500/8 text-periwinkle-400 text-xs font-medium mb-6">
             <Zap size={11} />
-            5 jours gratuits · Sans carte bancaire
+            Pour celles et ceux qui ressentent trop
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-[1.15] mb-5">
-            Quand le mental s'emballe,{' '}
+            Tu satures trop vite ?{' '}
             <span className="text-periwinkle-400">ASTER t'aide à redescendre.</span>
           </h1>
 
           <p className="text-base sm:text-lg text-slate-400 leading-relaxed mb-8 max-w-xl mx-auto">
-            Check-in émotionnel, protocoles guidés, journal avec analyse IA.
-            Un accompagnement quotidien, doux et concret — conçu pour celles et ceux qui ressentent trop.
+            Un espace quotidien pour les hypersensibles : tu nommes ce que tu ressens,
+            tu suis un exercice guidé, tu déposes le reste. Simple, doux, concret — pas une thérapie.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3 justify-center mb-8">
+          <div className="flex flex-col sm:flex-row items-center gap-3 justify-center mb-6">
             <button
               onClick={handleStart}
               className="w-full sm:w-auto flex items-center justify-center gap-2 px-7 h-12 rounded-xl bg-periwinkle-500 hover:bg-periwinkle-400 text-white font-semibold transition-colors text-base"
@@ -287,18 +291,35 @@ export default function Landing() {
             )}
           </div>
 
-          {/* Social proof mini */}
-          <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-slate-500">
-            <div className="flex items-center gap-1.5">
-              <div className="flex gap-0.5">
-                {[...Array(5)].map((_, i) => <Star key={i} size={11} className="text-amber-400 fill-amber-400" />)}
-              </div>
-              <span>4,9/5</span>
-            </div>
-            <span className="text-navy-700">·</span>
-            <span>2 000+ utilisateurs</span>
-            <span className="text-navy-700">·</span>
-            <span>150 000+ check-ins</span>
+          <p className="text-xs text-slate-500">5 jours gratuits · Sans carte bancaire · Résiliable à tout moment</p>
+        </div>
+      </section>
+
+      {/* Mini-intro : pour toi / c'est quoi / comment */}
+      <section className="px-5 pb-16">
+        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="rounded-xl border border-navy-700 bg-navy-900/60 px-5 py-5 text-left">
+            <p className="text-xs font-semibold uppercase tracking-widest text-periwinkle-400 mb-3">C'est pour toi si…</p>
+            <ul className="space-y-2.5 text-sm text-slate-300 leading-relaxed">
+              <li className="flex gap-2"><span className="text-periwinkle-400 shrink-0">·</span>Tu satures vite et les émotions débordent</li>
+              <li className="flex gap-2"><span className="text-periwinkle-400 shrink-0">·</span>Tu ressens trop, trop fort, trop longtemps</li>
+              <li className="flex gap-2"><span className="text-periwinkle-400 shrink-0">·</span>Tu veux du calme sans te forcer ni te juger</li>
+            </ul>
+          </div>
+          <div className="rounded-xl border border-navy-700 bg-navy-900/60 px-5 py-5 text-left">
+            <p className="text-xs font-semibold uppercase tracking-widest text-periwinkle-400 mb-3">Ce que c'est</p>
+            <p className="text-sm text-slate-300 leading-relaxed">
+              ASTER est un espace de <span className="text-white font-medium">régulation émotionnelle</span> au quotidien.
+              Pas une thérapie. Pas de contenu générique. Juste des outils concrets pour redescendre quand c'est trop.
+            </p>
+          </div>
+          <div className="rounded-xl border border-navy-700 bg-navy-900/60 px-5 py-5 text-left">
+            <p className="text-xs font-semibold uppercase tracking-widest text-periwinkle-400 mb-3">Comment ça marche</p>
+            <ol className="space-y-2.5 text-sm text-slate-300 leading-relaxed">
+              <li className="flex gap-2"><span className="text-periwinkle-400 font-semibold shrink-0">1.</span>Check-in — tu nommes ton état en 30 sec</li>
+              <li className="flex gap-2"><span className="text-periwinkle-400 font-semibold shrink-0">2.</span>Protocole guidé — un exercice, à voix haute si tu veux</li>
+              <li className="flex gap-2"><span className="text-periwinkle-400 font-semibold shrink-0">3.</span>Journal — tu déposes ce qui reste</li>
+            </ol>
           </div>
         </div>
       </section>
@@ -306,7 +327,7 @@ export default function Landing() {
       {/* Pain points */}
       <section className="py-12 px-5 border-y border-navy-800 bg-navy-900/40">
         <div className="max-w-3xl mx-auto">
-          <p className="text-center text-sm text-slate-500 mb-6 font-medium">Tu te reconnais dans l'une de ces situations ?</p>
+          <p className="text-center text-sm text-slate-500 mb-6 font-medium">Ça te parle ?</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {PAIN_POINTS.map(p => (
               <div key={p.text} className="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-navy-700 bg-navy-800">
@@ -325,8 +346,8 @@ export default function Landing() {
       <section className="py-16 px-5 max-w-5xl mx-auto">
         <div className="text-center mb-10">
           <p className="text-xs text-periwinkle-400 font-semibold uppercase tracking-widest mb-2">Les outils</p>
-          <h2 className="text-2xl sm:text-3xl font-bold">Tout ce dont tu as besoin pour aller mieux.</h2>
-          <p className="text-slate-400 text-sm mt-2 max-w-md mx-auto">Pas de contenu générique. Chaque outil s'adapte à ce que tu ressens, au moment où tu le ressens.</p>
+          <h2 className="text-2xl sm:text-3xl font-bold">Pour redescendre quand c'est trop.</h2>
+          <p className="text-slate-400 text-sm mt-2 max-w-md mx-auto">Chaque outil s'adapte à ce que tu ressens, au moment où tu le ressens.</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {FEATURES.map(f => (
