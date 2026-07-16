@@ -990,37 +990,56 @@ const PROTOCOLS: Protocol[] = [
 
 function useSpeech() {
   const [voiceEnabled, setVoiceEnabled] = useState(false)
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const stop = useCallback(() => {
+    if (timerRef.current != null) {
+      clearTimeout(timerRef.current)
+      timerRef.current = null
+    }
     window.speechSynthesis.cancel()
   }, [])
 
   const speak = useCallback((text: string) => {
-    if (!voiceEnabled) return
-    window.speechSynthesis.cancel()
-    const utterance = new SpeechSynthesisUtterance(text)
-    utterance.lang = 'fr-FR'
-    utterance.rate = 0.88
-    utterance.pitch = 1
-    utterance.volume = 1
-    // Pick the best French voice if available
-    const voices = window.speechSynthesis.getVoices()
-    const frVoice = voices.find(v => v.lang.startsWith('fr') && v.localService)
-      ?? voices.find(v => v.lang.startsWith('fr'))
-    if (frVoice) utterance.voice = frVoice
-    utteranceRef.current = utterance
-    window.speechSynthesis.speak(utterance)
-  }, [voiceEnabled])
+    // Cancel any current/pending speech, then wait —
+    // Chrome often drops speak() if called immediately after cancel().
+    stop()
+    timerRef.current = setTimeout(() => {
+      const utterance = new SpeechSynthesisUtterance(text)
+      utterance.lang = 'fr-FR'
+      utterance.rate = 0.88
+      utterance.pitch = 1
+      utterance.volume = 1
+      const voices = window.speechSynthesis.getVoices()
+      const frVoice =
+        voices.find(v => v.lang.startsWith('fr') && v.localService) ??
+        voices.find(v => v.lang.startsWith('fr'))
+      if (frVoice) utterance.voice = frVoice
+      window.speechSynthesis.speak(utterance)
+      // Chrome can leave the synth paused after cancel
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume()
+      }
+    }, 150)
+  }, [stop])
 
   const toggle = useCallback(() => {
     setVoiceEnabled(v => {
-      if (v) window.speechSynthesis.cancel()
+      if (v) stop()
       return !v
     })
-  }, [])
+  }, [stop])
 
-  useEffect(() => () => { window.speechSynthesis.cancel() }, [])
+  // Prefetch voices (async on Chrome)
+  useEffect(() => {
+    window.speechSynthesis.getVoices()
+    const onVoices = () => window.speechSynthesis.getVoices()
+    window.speechSynthesis.addEventListener('voiceschanged', onVoices)
+    return () => {
+      window.speechSynthesis.removeEventListener('voiceschanged', onVoices)
+      stop()
+    }
+  }, [stop])
 
   return { voiceEnabled, speak, stop, toggle }
 }
@@ -1062,19 +1081,42 @@ function ProtocolModal({ protocol, onClose }: { protocol: Protocol; onClose: () 
   const step = protocol.steps[currentStep]
   const isLast = currentStep === protocol.steps.length - 1
 
-  // Auto-read each step when voice is on and the protocol is running
+  // When user turns voice ON mid-protocol, read the current step
   useEffect(() => {
-    if (!running || !voiceEnabled || !step || completed) return
-    speak(step.instruction)
-  }, [currentStep, running, voiceEnabled, step, speak, completed])
+    if (voiceEnabled && running && !completed && step) {
+      speak(step.instruction)
+    }
+    // intentionally only when voiceEnabled flips on
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [voiceEnabled])
 
   const next = () => {
-    stop()
     if (isLast) {
+      stop()
       setCompleted(true)
-    } else {
-      // Keep running=true so the effect auto-speaks the next step
-      setCurrentStep(s => s + 1)
+      return
+    }
+    const nextIdx = currentStep + 1
+    const nextInstruction = protocol.steps[nextIdx]?.instruction
+    setCurrentStep(nextIdx)
+    if (voiceEnabled && nextInstruction) {
+      speak(nextInstruction)
+    }
+  }
+
+  const goBack = () => {
+    const prevIdx = currentStep - 1
+    setCurrentStep(prevIdx)
+    setRunning(true)
+    if (voiceEnabled) {
+      speak(protocol.steps[prevIdx].instruction)
+    }
+  }
+
+  const start = () => {
+    setRunning(true)
+    if (voiceEnabled) {
+      speak(protocol.steps[0].instruction)
     }
   }
 
@@ -1136,7 +1178,7 @@ function ProtocolModal({ protocol, onClose }: { protocol: Protocol; onClose: () 
                 </div>
                 <p className="text-xs text-slate-500 mb-3">{protocol.steps.length} étapes · {protocol.duration}</p>
                 <button
-                  onClick={() => setRunning(true)}
+                  onClick={start}
                   className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-periwinkle-500 hover:bg-periwinkle-400 text-white font-semibold text-sm transition-colors"
                 >
                   <Play size={14} />
@@ -1196,7 +1238,7 @@ function ProtocolModal({ protocol, onClose }: { protocol: Protocol; onClose: () 
                 <div className="flex gap-3">
                   {currentStep > 0 && (
                     <button
-                      onClick={() => { stop(); setCurrentStep(s => s - 1); setRunning(true) }}
+                      onClick={goBack}
                       className="px-4 py-2.5 rounded-xl border border-navy-600 text-slate-400 text-sm hover:text-white hover:bg-navy-800 transition-colors"
                     >
                       Retour
