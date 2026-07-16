@@ -186,6 +186,10 @@ const FAQ = [
     q: 'ASTER fonctionne-t-il sur mobile ?',
     a: 'Oui. ASTER est une application web progressive, optimisée pour mobile et desktop. Aucun téléchargement requis — elle fonctionne directement depuis ton navigateur.',
   },
+  {
+    q: 'Comment vous contacter ?',
+    a: `Pour toute question ou problème, écris-nous à ${SUPPORT_EMAIL}. On te répond sous 24–48 h.`,
+  },
 ]
 
 export default function Landing() {
