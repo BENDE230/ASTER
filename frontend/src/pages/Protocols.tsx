@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { Clock, Lock, X, ChevronRight, CheckCircle2, Play, Pause } from 'lucide-react'
+import { Clock, Lock, X, ChevronRight, CheckCircle2, Play, Pause, Volume2, VolumeX } from 'lucide-react'
 import { usePremium } from '../hooks/usePremium'
 import { AnalyticsEvents, track } from '../lib/analytics'
 
@@ -987,16 +987,89 @@ const PROTOCOLS: Protocol[] = [
   },
 ]
 
+function useSpeech() {
+  const [voiceEnabled, setVoiceEnabled] = useState(false)
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
+
+  const stop = useCallback(() => {
+    window.speechSynthesis.cancel()
+  }, [])
+
+  const speak = useCallback((text: string) => {
+    if (!voiceEnabled) return
+    window.speechSynthesis.cancel()
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.lang = 'fr-FR'
+    utterance.rate = 0.88
+    utterance.pitch = 1
+    utterance.volume = 1
+    // Pick the best French voice if available
+    const voices = window.speechSynthesis.getVoices()
+    const frVoice = voices.find(v => v.lang.startsWith('fr') && v.localService)
+      ?? voices.find(v => v.lang.startsWith('fr'))
+    if (frVoice) utterance.voice = frVoice
+    utteranceRef.current = utterance
+    window.speechSynthesis.speak(utterance)
+  }, [voiceEnabled])
+
+  const toggle = useCallback(() => {
+    setVoiceEnabled(v => {
+      if (v) window.speechSynthesis.cancel()
+      return !v
+    })
+  }, [])
+
+  useEffect(() => () => { window.speechSynthesis.cancel() }, [])
+
+  return { voiceEnabled, speak, stop, toggle }
+}
+
+function CompletionScreen({ closing, onClose, voiceEnabled, speak }: {
+  closing: string
+  onClose: () => void
+  voiceEnabled: boolean
+  speak: (text: string) => void
+}) {
+  useEffect(() => {
+    if (voiceEnabled) speak(`Protocole terminé. ${closing}`)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <div className="px-6 py-8 text-center overflow-y-auto">
+      <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto mb-4">
+        <CheckCircle2 size={26} className="text-emerald-400" />
+      </div>
+      <p className="text-white font-semibold text-lg mb-3">Protocole terminé</p>
+      <p className="text-sm text-slate-400 leading-relaxed mb-6 italic">"{closing}"</p>
+      <button
+        onClick={onClose}
+        className="px-6 py-2.5 rounded-xl bg-periwinkle-500 hover:bg-periwinkle-400 text-white text-sm font-semibold transition-colors"
+      >
+        Terminer
+      </button>
+    </div>
+  )
+}
+
 function ProtocolModal({ protocol, onClose }: { protocol: Protocol; onClose: () => void }) {
   const [currentStep, setCurrentStep] = useState(0)
   const [completed, setCompleted] = useState(false)
   const [running, setRunning] = useState(false)
   const [stepNotes, setStepNotes] = useState<Record<number, string>>({})
+  const { voiceEnabled, speak, stop, toggle } = useSpeech()
 
   const step = protocol.steps[currentStep]
   const isLast = currentStep === protocol.steps.length - 1
 
+  // Auto-read instruction when step changes and voice is on
+  useEffect(() => {
+    if (running && voiceEnabled && step) {
+      speak(step.instruction)
+    }
+  }, [currentStep, running, voiceEnabled, step, speak])
+
   const next = () => {
+    stop()
     if (isLast) {
       setCompleted(true)
     } else {
@@ -1021,26 +1094,33 @@ function ProtocolModal({ protocol, onClose }: { protocol: Protocol; onClose: () 
               <Clock size={11} /> {protocol.duration}
             </p>
           </div>
-          <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors mt-1">
-            <X size={20} />
-          </button>
+          <div className="flex items-center gap-2 mt-1">
+            <button
+              onClick={toggle}
+              title={voiceEnabled ? 'Désactiver la voix' : 'Activer la voix guidée'}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                voiceEnabled
+                  ? 'bg-periwinkle-500/20 text-periwinkle-400 border border-periwinkle-500/40'
+                  : 'text-slate-500 hover:text-slate-300 border border-navy-600 hover:bg-navy-800'
+              }`}
+            >
+              {voiceEnabled ? <Volume2 size={13} /> : <VolumeX size={13} />}
+              <span className="hidden sm:inline">{voiceEnabled ? 'Voix on' : 'Voix'}</span>
+            </button>
+            <button onClick={() => { stop(); onClose() }} className="text-slate-500 hover:text-white transition-colors">
+              <X size={20} />
+            </button>
+          </div>
         </div>
 
         {completed ? (
           /* Completion screen */
-          <div className="px-6 py-8 text-center overflow-y-auto">
-            <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto mb-4">
-              <CheckCircle2 size={26} className="text-emerald-400" />
-            </div>
-            <p className="text-white font-semibold text-lg mb-3">Protocole terminé</p>
-            <p className="text-sm text-slate-400 leading-relaxed mb-6 italic">"{protocol.closing}"</p>
-            <button
-              onClick={onClose}
-              className="px-6 py-2.5 rounded-xl bg-periwinkle-500 hover:bg-periwinkle-400 text-white text-sm font-semibold transition-colors"
-            >
-              Terminer
-            </button>
-          </div>
+          <CompletionScreen
+            closing={protocol.closing}
+            onClose={() => { stop(); onClose() }}
+            voiceEnabled={voiceEnabled}
+            speak={speak}
+          />
         ) : (
           <>
             {/* Intro (step 0 not started) or Step view */}
@@ -1056,7 +1136,10 @@ function ProtocolModal({ protocol, onClose }: { protocol: Protocol; onClose: () 
                 </div>
                 <p className="text-xs text-slate-500 mb-3">{protocol.steps.length} étapes · {protocol.duration}</p>
                 <button
-                  onClick={() => setRunning(true)}
+                  onClick={() => {
+                    setRunning(true)
+                    if (voiceEnabled) speak(protocol.steps[0].instruction)
+                  }}
                   className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-periwinkle-500 hover:bg-periwinkle-400 text-white font-semibold text-sm transition-colors"
                 >
                   <Play size={14} />
@@ -1091,6 +1174,16 @@ function ProtocolModal({ protocol, onClose }: { protocol: Protocol; onClose: () 
 
                 <div className="rounded-xl bg-navy-800 border border-navy-700 px-4 py-4 mb-3">
                   <p className="text-sm text-slate-300 leading-relaxed">{step.instruction}</p>
+                  <button
+                    onClick={() => speak(step.instruction)}
+                    title="Lire à voix haute"
+                    className={`mt-3 flex items-center gap-1.5 text-xs transition-colors ${
+                      voiceEnabled ? 'text-periwinkle-400 hover:text-periwinkle-300' : 'text-slate-600 hover:text-slate-400'
+                    }`}
+                  >
+                    <Volume2 size={12} />
+                    {voiceEnabled ? 'Relire' : 'Lire'}
+                  </button>
                 </div>
 
                 {step.hasInput && (
@@ -1106,7 +1199,7 @@ function ProtocolModal({ protocol, onClose }: { protocol: Protocol; onClose: () 
                 <div className="flex gap-3">
                   {currentStep > 0 && (
                     <button
-                      onClick={() => { setCurrentStep(s => s - 1); setRunning(true) }}
+                      onClick={() => { stop(); setCurrentStep(s => s - 1); setRunning(true) }}
                       className="px-4 py-2.5 rounded-xl border border-navy-600 text-slate-400 text-sm hover:text-white hover:bg-navy-800 transition-colors"
                     >
                       Retour
