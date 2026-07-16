@@ -6,6 +6,7 @@ import { useApi } from '../hooks/useApi'
 import { usePremium } from '../hooks/usePremium'
 import { useToast } from './Toast'
 import { AnalyticsEvents, track } from '../lib/analytics'
+import { openProtocol } from '../lib/openProtocol'
 
 const NAV = [
   { to: '/dashboard',  label: 'Accueil',    icon: Home },
@@ -110,7 +111,8 @@ export default function Sidebar({ trialDaysLeft = 5 }: SidebarProps) {
           </div>
         )}
         <button
-          onClick={() => navigate('/protocols?open=coherence-cardiaque')}
+          type="button"
+          onClick={() => openProtocol('coherence-cardiaque', navigate)}
           className="flex items-center gap-2 w-full px-3 py-2 text-xs text-red-400 hover:text-red-300 transition-colors"
         >
           <Zap size={13} />

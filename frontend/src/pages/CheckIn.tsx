@@ -7,6 +7,7 @@ import { useApi } from '../hooks/useApi'
 import { useCachedQuery } from '../hooks/useCachedQuery'
 import { invalidateCache } from '../lib/api'
 import { AnalyticsEvents, track } from '../lib/analytics'
+import { openProtocol } from '../lib/openProtocol'
 
 const OPTIONS = [
   { emoji: '🌀', label: 'Je suranalyse',      description: 'Les pensées tournent sans fin.',          protocol: 'ancrage-5-sens' },
@@ -129,7 +130,7 @@ export default function CheckIn() {
             <p className="text-xs text-periwinkle-400 font-semibold uppercase tracking-widest mb-2">Recommandé pour toi</p>
             <p className="text-sm text-slate-400 mb-3">Un protocole adapté à ton état :</p>
             <button
-              onClick={() => navigate(`/protocols?open=${selected.protocol}`)}
+              onClick={() => openProtocol(selected.protocol, navigate)}
               className="w-full flex items-center justify-between px-4 py-3 rounded-lg bg-navy-800 border border-navy-600 hover:bg-navy-700 transition-colors group"
             >
               <div className="flex items-center gap-3">

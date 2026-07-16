@@ -7,6 +7,7 @@ import { useApi } from '../hooks/useApi'
 import { useCachedQuery } from '../hooks/useCachedQuery'
 import { invalidateCache } from '../lib/api'
 import { AnalyticsEvents, track } from '../lib/analytics'
+import { openProtocol } from '../lib/openProtocol'
 
 const PROTOCOLS = [
   { id: 'ancrage-5-sens',       tag: 'Anti-rumination', tagColor: 'text-violet-400 bg-violet-400/10',   duration: '3 min', title: 'Ancrage par les 5 sens' },
@@ -195,7 +196,7 @@ export default function Dashboard() {
             {PROTOCOLS.map(p => (
               <button
                 key={p.title}
-                onClick={() => navigate(`/protocols?open=${p.id}`)}
+                onClick={() => openProtocol(p.id, navigate)}
                 className="text-left rounded-xl border border-navy-700 bg-navy-800 hover:bg-navy-700 active:scale-95 transition-all p-4"
               >
                 <div className="flex items-center justify-between mb-2">

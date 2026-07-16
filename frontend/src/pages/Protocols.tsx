@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate, useLocation } from 'react-router-dom'
 import { Clock, Lock, X, ChevronRight, CheckCircle2, Play, Pause, Volume2, VolumeX } from 'lucide-react'
 import { usePremium } from '../hooks/usePremium'
 import { AnalyticsEvents, track } from '../lib/analytics'
+import { OPEN_PROTOCOL_EVENT } from '../lib/openProtocol'
 
 const CATEGORIES = ['Tous', 'Anti-rumination', 'Respiration', 'Retour au corps', 'Hypervigilance', 'Sommeil', 'Sécurité émotionnelle']
 
@@ -1239,17 +1240,36 @@ export default function Protocols() {
   const [searchParams] = useSearchParams()
   const location = useLocation()
 
-  useEffect(() => {
-    const openId = searchParams.get('open')
-    if (openId) {
-      const protocol = PROTOCOLS.find(p => p.id === openId)
-      if (protocol && (!protocol.premium || isPremium)) {
-        setSelectedProtocol(protocol)
-      }
+  const tryOpen = useCallback((openId: string | null) => {
+    if (!openId) return
+    const protocol = PROTOCOLS.find(p => p.id === openId)
+    if (protocol && (!protocol.premium || isPremium)) {
+      setSelectedProtocol(protocol)
+      track(AnalyticsEvents.PROTOCOL_OPENED, {
+        protocol_id: protocol.id,
+        title: protocol.title,
+        category: protocol.category,
+        premium: protocol.premium,
+        source: 'deep_link',
+      })
     }
+  }, [isPremium])
+
+  // Deep link via URL (?open=...)
+  useEffect(() => {
+    tryOpen(searchParams.get('open'))
   // location.search is a plain string — reliable dep in keep-alive pages
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.search, isPremium])
+  }, [location.search, tryOpen])
+
+  // Direct open from Sidebar / Dashboard (works even if URL unchanged)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      tryOpen((e as CustomEvent<string>).detail)
+    }
+    window.addEventListener(OPEN_PROTOCOL_EVENT, handler)
+    return () => window.removeEventListener(OPEN_PROTOCOL_EVENT, handler)
+  }, [tryOpen])
 
   const allFiltered = activeCategory === 'Tous'
     ? PROTOCOLS
@@ -1401,7 +1421,12 @@ export default function Protocols() {
       {selectedProtocol && (
         <ProtocolModal
           protocol={selectedProtocol}
-          onClose={() => setSelectedProtocol(null)}
+          onClose={() => {
+            setSelectedProtocol(null)
+            if (searchParams.get('open')) {
+              navigate('/protocols', { replace: true })
+            }
+          }}
         />
       )}
     </>
