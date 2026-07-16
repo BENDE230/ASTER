@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { AnalyticsEvents, track } from '../lib/analytics'
 import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '../lib/support'
+import ReviewSection from '../components/ReviewSection'
 
 const FEATURES = [
   {
@@ -454,6 +455,16 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Avis */}
+      <section id="avis" className="py-16 px-5 max-w-4xl mx-auto">
+        <div className="text-center mb-10">
+          <p className="text-xs text-periwinkle-400 font-semibold uppercase tracking-widest mb-2">Avis</p>
+          <h2 className="text-2xl sm:text-3xl font-bold">Ce qu'en disent les utilisateurs.</h2>
+          <p className="text-slate-400 text-sm mt-2">Laisse ton retour — ça aide les autres à se lancer.</p>
+        </div>
+        <ReviewSection />
+      </section>
+
       {/* FAQ */}
       <section className="py-16 px-5 max-w-3xl mx-auto">
         <div className="text-center mb-10">
@@ -504,6 +515,7 @@ export default function Landing() {
           </div>
           <div className="flex items-center gap-5">
             <a href="#tarifs" className="hover:text-slate-400 transition-colors">Tarifs</a>
+            <a href="#avis" className="hover:text-slate-400 transition-colors">Avis</a>
             <a href={SUPPORT_MAILTO} className="hover:text-slate-400 transition-colors">Contact</a>
             <button onClick={handleStart} className="hover:text-slate-400 transition-colors">Commencer</button>
             {!isSignedIn && (

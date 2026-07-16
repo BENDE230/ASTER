@@ -7,6 +7,7 @@ import { useCachedQuery } from '../hooks/useCachedQuery'
 import { useToast } from '../components/Toast'
 import { AnalyticsEvents, track } from '../lib/analytics'
 import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '../lib/support'
+import ReviewSection from '../components/ReviewSection'
 
 interface Subscription {
   is_premium: boolean
@@ -340,6 +341,20 @@ export default function Profile() {
               </p>
             </div>
           )}
+        </div>
+
+        {/* Avis */}
+        <div className="rounded-xl border border-navy-700 bg-navy-800 mb-4 overflow-hidden">
+          <div className="px-5 py-3 border-b border-navy-700">
+            <p className="text-sm font-semibold text-white">Laisser un avis</p>
+            <p className="text-xs text-slate-500 mt-0.5">Partage ton expérience — visible sur la page d'accueil.</p>
+          </div>
+          <div className="px-5 py-4">
+            <ReviewSection
+              compact
+              defaultName={user?.firstName ?? user?.fullName ?? ''}
+            />
+          </div>
         </div>
 
         {/* Support */}
