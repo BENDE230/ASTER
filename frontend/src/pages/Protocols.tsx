@@ -989,7 +989,15 @@ const PROTOCOLS: Protocol[] = [
 ]
 
 function useSpeech() {
-  const [voiceEnabled, setVoiceEnabled] = useState(false)
+  const [voiceEnabled, setVoiceEnabled] = useState(() => {
+    try {
+      const saved = localStorage.getItem('aster:protocol-voice')
+      // Default ON — auto-guide is the expected experience
+      return saved === null ? true : saved === 'true'
+    } catch {
+      return true
+    }
+  })
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const stop = useCallback(() => {
@@ -1001,10 +1009,12 @@ function useSpeech() {
   }, [])
 
   const speak = useCallback((text: string) => {
-    // Cancel any current/pending speech, then wait —
-    // Chrome often drops speak() if called immediately after cancel().
-    stop()
-    timerRef.current = setTimeout(() => {
+    if (timerRef.current != null) {
+      clearTimeout(timerRef.current)
+      timerRef.current = null
+    }
+
+    const run = () => {
       const utterance = new SpeechSynthesisUtterance(text)
       utterance.lang = 'fr-FR'
       utterance.rate = 0.88
@@ -1016,21 +1026,28 @@ function useSpeech() {
         voices.find(v => v.lang.startsWith('fr'))
       if (frVoice) utterance.voice = frVoice
       window.speechSynthesis.speak(utterance)
-      // Chrome can leave the synth paused after cancel
-      if (window.speechSynthesis.paused) {
-        window.speechSynthesis.resume()
-      }
-    }, 150)
-  }, [stop])
+      if (window.speechSynthesis.paused) window.speechSynthesis.resume()
+    }
+
+    // If something is already speaking, cancel then retry shortly.
+    // If idle, speak immediately to keep the user-gesture (needed on Chrome).
+    if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+      window.speechSynthesis.cancel()
+      timerRef.current = setTimeout(run, 80)
+    } else {
+      run()
+    }
+  }, [])
 
   const toggle = useCallback(() => {
     setVoiceEnabled(v => {
-      if (v) stop()
-      return !v
+      const next = !v
+      try { localStorage.setItem('aster:protocol-voice', String(next)) } catch { /* ignore */ }
+      if (!next) stop()
+      return next
     })
   }, [stop])
 
-  // Prefetch voices (async on Chrome)
   useEffect(() => {
     window.speechSynthesis.getVoices()
     const onVoices = () => window.speechSynthesis.getVoices()
@@ -1097,26 +1114,29 @@ function ProtocolModal({ protocol, onClose }: { protocol: Protocol; onClose: () 
       return
     }
     const nextIdx = currentStep + 1
-    const nextInstruction = protocol.steps[nextIdx]?.instruction
+    const nextStep = protocol.steps[nextIdx]
     setCurrentStep(nextIdx)
-    if (voiceEnabled && nextInstruction) {
-      speak(nextInstruction)
+    // Always guide aloud when voice is on (default: on)
+    if (voiceEnabled && nextStep) {
+      speak(`${nextStep.title}. ${nextStep.instruction}`)
     }
   }
 
   const goBack = () => {
     const prevIdx = currentStep - 1
+    const prevStep = protocol.steps[prevIdx]
     setCurrentStep(prevIdx)
     setRunning(true)
-    if (voiceEnabled) {
-      speak(protocol.steps[prevIdx].instruction)
+    if (voiceEnabled && prevStep) {
+      speak(`${prevStep.title}. ${prevStep.instruction}`)
     }
   }
 
   const start = () => {
     setRunning(true)
     if (voiceEnabled) {
-      speak(protocol.steps[0].instruction)
+      const first = protocol.steps[0]
+      speak(`${first.title}. ${first.instruction}`)
     }
   }
 
