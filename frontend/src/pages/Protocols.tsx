@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate, useLocation } from 'react-router-dom'
 import { Clock, Lock, X, ChevronRight, CheckCircle2, Play, Pause, Volume2, VolumeX } from 'lucide-react'
 import { usePremium } from '../hooks/usePremium'
 import { AnalyticsEvents, track } from '../lib/analytics'
-import { OPEN_PROTOCOL_EVENT } from '../lib/openProtocol'
+import { OPEN_PROTOCOL_EVENT, consumePendingProtocol } from '../lib/openProtocol'
 
 const CATEGORIES = ['Tous', 'Anti-rumination', 'Respiration', 'Retour au corps', 'Hypervigilance', 'Sommeil', 'Sécurité émotionnelle']
 
@@ -1255,14 +1255,14 @@ export default function Protocols() {
     }
   }, [isPremium])
 
-  // Deep link via URL (?open=...)
+  // When /protocols becomes active: open from sessionStorage, event, or ?open=
   useEffect(() => {
-    tryOpen(searchParams.get('open'))
-  // location.search is a plain string — reliable dep in keep-alive pages
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.search, tryOpen])
+    if (location.pathname !== '/protocols') return
+    const pending = consumePendingProtocol()
+    tryOpen(pending ?? searchParams.get('open'))
+  }, [location.pathname, location.search, tryOpen, searchParams])
 
-  // Direct open from Sidebar / Dashboard (works even if URL unchanged)
+  // Direct open while Protocols is already mounted (keep-alive)
   useEffect(() => {
     const handler = (e: Event) => {
       tryOpen((e as CustomEvent<string>).detail)
