@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useUser, useClerk } from '@clerk/clerk-react'
 import { useNavigate } from 'react-router-dom'
-import { LogOut, Crown, CreditCard, Calendar, ChevronRight, User, Shield, ExternalLink, Bell, BellOff, Send } from 'lucide-react'
+import { LogOut, Crown, CreditCard, Calendar, ChevronRight, User, Shield, ExternalLink, Bell, BellOff, Send, Mail } from 'lucide-react'
 import { useApi } from '../hooks/useApi'
 import { useCachedQuery } from '../hooks/useCachedQuery'
 import { useToast } from '../components/Toast'
 import { AnalyticsEvents, track } from '../lib/analytics'
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '../lib/support'
 
 interface Subscription {
   is_premium: boolean
@@ -106,7 +107,7 @@ export default function Profile() {
       const data = await post<{ url: string }>('/api/stripe/portal', {})
       window.location.href = data.url
     } catch {
-      toast.error("Impossible d'accéder au portail. Contacte le support.")
+      toast.error("Impossible d'accéder au portail. Écris-nous à " + SUPPORT_EMAIL)
     } finally {
       setLoadingPortal(false)
     }
@@ -340,6 +341,23 @@ export default function Profile() {
             </div>
           )}
         </div>
+
+        {/* Support */}
+        <a
+          href={SUPPORT_MAILTO}
+          className="block rounded-xl border border-navy-700 bg-navy-800 hover:bg-navy-700 transition-colors mb-4"
+        >
+          <div className="px-5 py-4 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-periwinkle-500/10 border border-periwinkle-500/20 flex items-center justify-center flex-shrink-0">
+              <Mail size={16} className="text-periwinkle-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-white">Besoin d'aide ?</p>
+              <p className="text-xs text-slate-500 truncate">{SUPPORT_EMAIL}</p>
+            </div>
+            <ChevronRight size={14} className="text-slate-600 flex-shrink-0" />
+          </div>
+        </a>
 
         {/* Sign out */}
         <button

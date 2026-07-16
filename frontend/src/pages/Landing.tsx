@@ -6,6 +6,7 @@ import {
   ChevronRight, Star, ArrowRight, Zap, Heart, TrendingUp, Clock,
 } from 'lucide-react'
 import { AnalyticsEvents, track } from '../lib/analytics'
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '../lib/support'
 
 const FEATURES = [
   {
@@ -499,6 +500,7 @@ export default function Landing() {
           </div>
           <div className="flex items-center gap-5">
             <a href="#tarifs" className="hover:text-slate-400 transition-colors">Tarifs</a>
+            <a href={SUPPORT_MAILTO} className="hover:text-slate-400 transition-colors">Contact</a>
             <button onClick={handleStart} className="hover:text-slate-400 transition-colors">Commencer</button>
             {!isSignedIn && (
               <SignInButton mode="modal">
@@ -506,7 +508,10 @@ export default function Landing() {
               </SignInButton>
             )}
           </div>
-          <span>© 2026 ASTER. Tous droits réservés.</span>
+          <div className="flex flex-col items-center sm:items-end gap-1">
+            <a href={SUPPORT_MAILTO} className="hover:text-slate-400 transition-colors">{SUPPORT_EMAIL}</a>
+            <span>© 2026 ASTER. Tous droits réservés.</span>
+          </div>
         </div>
       </footer>
     </div>
