@@ -1062,20 +1062,19 @@ function ProtocolModal({ protocol, onClose }: { protocol: Protocol; onClose: () 
   const step = protocol.steps[currentStep]
   const isLast = currentStep === protocol.steps.length - 1
 
-  // Auto-read instruction when step changes and voice is on
+  // Auto-read each step when voice is on and the protocol is running
   useEffect(() => {
-    if (running && voiceEnabled && step) {
-      speak(step.instruction)
-    }
-  }, [currentStep, running, voiceEnabled, step, speak])
+    if (!running || !voiceEnabled || !step || completed) return
+    speak(step.instruction)
+  }, [currentStep, running, voiceEnabled, step, speak, completed])
 
   const next = () => {
     stop()
     if (isLast) {
       setCompleted(true)
     } else {
+      // Keep running=true so the effect auto-speaks the next step
       setCurrentStep(s => s + 1)
-      setRunning(false)
     }
   }
 
@@ -1137,10 +1136,7 @@ function ProtocolModal({ protocol, onClose }: { protocol: Protocol; onClose: () 
                 </div>
                 <p className="text-xs text-slate-500 mb-3">{protocol.steps.length} étapes · {protocol.duration}</p>
                 <button
-                  onClick={() => {
-                    setRunning(true)
-                    if (voiceEnabled) speak(protocol.steps[0].instruction)
-                  }}
+                  onClick={() => setRunning(true)}
                   className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-periwinkle-500 hover:bg-periwinkle-400 text-white font-semibold text-sm transition-colors"
                 >
                   <Play size={14} />
