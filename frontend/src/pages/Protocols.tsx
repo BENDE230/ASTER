@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useSearchParams, useNavigate } from 'react-router-dom'
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom'
 import { Clock, Lock, X, ChevronRight, CheckCircle2, Play, Pause, Volume2, VolumeX } from 'lucide-react'
 import { usePremium } from '../hooks/usePremium'
 import { AnalyticsEvents, track } from '../lib/analytics'
@@ -1237,6 +1237,7 @@ export default function Protocols() {
   const [selectedProtocol, setSelectedProtocol] = useState<Protocol | null>(null)
   const isPremium = usePremium()
   const [searchParams] = useSearchParams()
+  const location = useLocation()
 
   useEffect(() => {
     const openId = searchParams.get('open')
@@ -1246,7 +1247,9 @@ export default function Protocols() {
         setSelectedProtocol(protocol)
       }
     }
-  }, [searchParams, isPremium])
+  // location.search is a plain string — reliable dep in keep-alive pages
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.search, isPremium])
 
   const allFiltered = activeCategory === 'Tous'
     ? PROTOCOLS
