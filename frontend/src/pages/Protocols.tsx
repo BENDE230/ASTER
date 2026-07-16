@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom'
-import { Clock, Lock, X, ChevronRight, CheckCircle2, Play, Pause, Volume2, VolumeX } from 'lucide-react'
+import { Clock, Lock, X, ChevronRight, CheckCircle2, Play, Pause, Volume2, VolumeX, Mic2 } from 'lucide-react'
 import { usePremium } from '../hooks/usePremium'
 import { AnalyticsEvents, track } from '../lib/analytics'
 import { OPEN_PROTOCOL_EVENT, consumePendingProtocol } from '../lib/openProtocol'
@@ -988,17 +988,50 @@ const PROTOCOLS: Protocol[] = [
   },
 ]
 
+const VOICE_URI_KEY = 'aster:protocol-voice-uri'
+const VOICE_ENABLED_KEY = 'aster:protocol-voice'
+
+function friendlyVoiceName(v: SpeechSynthesisVoice): string {
+  return v.name
+    .replace(/^Microsoft\s+/i, '')
+    .replace(/^Google\s+/i, '')
+    .replace(/\s+Online\s*\(Natural\)/i, '')
+    .replace(/\s*\(Natural\)/i, '')
+    .replace(/\s*-\s*French.*$/i, '')
+    .replace(/\s*\(.*France.*\)$/i, '')
+    .trim() || v.name
+}
+
+function pickDefaultVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
+  return (
+    voices.find(v => v.lang.startsWith('fr') && /denise|hortense|julie|pauline|marie|thomas|claude/i.test(v.name)) ??
+    voices.find(v => v.lang.startsWith('fr') && v.localService) ??
+    voices.find(v => v.lang.startsWith('fr')) ??
+    voices[0] ??
+    null
+  )
+}
+
 function useSpeech() {
   const [voiceEnabled, setVoiceEnabled] = useState(() => {
     try {
-      const saved = localStorage.getItem('aster:protocol-voice')
-      // Default ON — auto-guide is the expected experience
+      const saved = localStorage.getItem(VOICE_ENABLED_KEY)
       return saved === null ? true : saved === 'true'
     } catch {
       return true
     }
   })
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([])
+  const [selectedUri, setSelectedUri] = useState<string>(() => {
+    try {
+      return localStorage.getItem(VOICE_URI_KEY) ?? ''
+    } catch {
+      return ''
+    }
+  })
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const selectedUriRef = useRef(selectedUri)
+  selectedUriRef.current = selectedUri
 
   const stop = useCallback(() => {
     if (timerRef.current != null) {
@@ -1016,21 +1049,23 @@ function useSpeech() {
 
     const run = () => {
       const utterance = new SpeechSynthesisUtterance(text)
-      utterance.lang = 'fr-FR'
       utterance.rate = 0.88
       utterance.pitch = 1
       utterance.volume = 1
-      const voices = window.speechSynthesis.getVoices()
-      const frVoice =
-        voices.find(v => v.lang.startsWith('fr') && v.localService) ??
-        voices.find(v => v.lang.startsWith('fr'))
-      if (frVoice) utterance.voice = frVoice
+      const all = window.speechSynthesis.getVoices()
+      const chosen =
+        all.find(v => v.voiceURI === selectedUriRef.current) ??
+        pickDefaultVoice(all)
+      if (chosen) {
+        utterance.voice = chosen
+        utterance.lang = chosen.lang
+      } else {
+        utterance.lang = 'fr-FR'
+      }
       window.speechSynthesis.speak(utterance)
       if (window.speechSynthesis.paused) window.speechSynthesis.resume()
     }
 
-    // If something is already speaking, cancel then retry shortly.
-    // If idle, speak immediately to keep the user-gesture (needed on Chrome).
     if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
       window.speechSynthesis.cancel()
       timerRef.current = setTimeout(run, 80)
@@ -1039,26 +1074,51 @@ function useSpeech() {
     }
   }, [])
 
+  const setVoiceUri = useCallback((uri: string) => {
+    setSelectedUri(uri)
+    try { localStorage.setItem(VOICE_URI_KEY, uri) } catch { /* ignore */ }
+  }, [])
+
   const toggle = useCallback(() => {
     setVoiceEnabled(v => {
       const next = !v
-      try { localStorage.setItem('aster:protocol-voice', String(next)) } catch { /* ignore */ }
+      try { localStorage.setItem(VOICE_ENABLED_KEY, String(next)) } catch { /* ignore */ }
       if (!next) stop()
       return next
     })
   }, [stop])
 
   useEffect(() => {
-    window.speechSynthesis.getVoices()
-    const onVoices = () => window.speechSynthesis.getVoices()
-    window.speechSynthesis.addEventListener('voiceschanged', onVoices)
+    const load = () => {
+      const all = window.speechSynthesis.getVoices()
+      if (!all.length) return
+      // French first, then the rest
+      const sorted = [
+        ...all.filter(v => v.lang.startsWith('fr')),
+        ...all.filter(v => !v.lang.startsWith('fr')),
+      ]
+      setVoices(sorted)
+
+      setSelectedUri(prev => {
+        if (prev && all.some(v => v.voiceURI === prev)) return prev
+        const def = pickDefaultVoice(all)
+        const uri = def?.voiceURI ?? ''
+        if (uri) {
+          try { localStorage.setItem(VOICE_URI_KEY, uri) } catch { /* ignore */ }
+        }
+        return uri
+      })
+    }
+
+    load()
+    window.speechSynthesis.addEventListener('voiceschanged', load)
     return () => {
-      window.speechSynthesis.removeEventListener('voiceschanged', onVoices)
+      window.speechSynthesis.removeEventListener('voiceschanged', load)
       stop()
     }
   }, [stop])
 
-  return { voiceEnabled, speak, stop, toggle }
+  return { voiceEnabled, speak, stop, toggle, voices, selectedUri, setVoiceUri }
 }
 
 function CompletionScreen({ closing, onClose, voiceEnabled, speak }: {
@@ -1093,7 +1153,8 @@ function ProtocolModal({ protocol, onClose }: { protocol: Protocol; onClose: () 
   const [completed, setCompleted] = useState(false)
   const [running, setRunning] = useState(false)
   const [stepNotes, setStepNotes] = useState<Record<number, string>>({})
-  const { voiceEnabled, speak, stop, toggle } = useSpeech()
+  const { voiceEnabled, speak, stop, toggle, voices, selectedUri, setVoiceUri } = useSpeech()
+  const [showVoicePicker, setShowVoicePicker] = useState(false)
 
   const step = protocol.steps[currentStep]
   const isLast = currentStep === protocol.steps.length - 1
@@ -1156,8 +1217,9 @@ function ProtocolModal({ protocol, onClose }: { protocol: Protocol; onClose: () 
               <Clock size={11} /> {protocol.duration}
             </p>
           </div>
-          <div className="flex items-center gap-2 mt-1">
+          <div className="flex items-center gap-2 mt-1 shrink-0">
             <button
+              type="button"
               onClick={toggle}
               title={voiceEnabled ? 'Désactiver la voix' : 'Activer la voix guidée'}
               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
@@ -1169,11 +1231,49 @@ function ProtocolModal({ protocol, onClose }: { protocol: Protocol; onClose: () 
               {voiceEnabled ? <Volume2 size={13} /> : <VolumeX size={13} />}
               <span className="hidden sm:inline">{voiceEnabled ? 'Voix on' : 'Voix'}</span>
             </button>
-            <button onClick={() => { stop(); onClose() }} className="text-slate-500 hover:text-white transition-colors">
+            <button
+              type="button"
+              onClick={() => setShowVoicePicker(v => !v)}
+              title="Changer de voix"
+              className={`p-1.5 rounded-lg text-xs transition-colors border ${
+                showVoicePicker
+                  ? 'border-periwinkle-500/40 text-periwinkle-400 bg-periwinkle-500/10'
+                  : 'border-navy-600 text-slate-500 hover:text-slate-300 hover:bg-navy-800'
+              }`}
+            >
+              <Mic2 size={13} />
+            </button>
+            <button type="button" onClick={() => { stop(); onClose() }} className="text-slate-500 hover:text-white transition-colors">
               <X size={20} />
             </button>
           </div>
         </div>
+
+        {showVoicePicker && (
+          <div className="px-6 py-3 border-b border-navy-700 bg-navy-950/50">
+            <p className="text-xs text-slate-500 mb-2">Choisir une voix</p>
+            <select
+              value={selectedUri}
+              onChange={e => {
+                const uri = e.target.value
+                setVoiceUri(uri)
+                // Preview the new voice
+                speak('Salut, je suis ta voix guidée pour les protocoles.')
+              }}
+              className="w-full rounded-lg bg-navy-800 border border-navy-600 text-sm text-slate-200 px-3 py-2 focus:outline-none focus:border-periwinkle-500"
+            >
+              {voices.length === 0 && <option value="">Chargement des voix…</option>}
+              {voices.map(v => (
+                <option key={v.voiceURI} value={v.voiceURI}>
+                  {friendlyVoiceName(v)} · {v.lang}
+                </option>
+              ))}
+            </select>
+            <p className="text-[11px] text-slate-600 mt-1.5">
+              Les voix disponibles dépendent de ton navigateur et de ton système.
+            </p>
+          </div>
+        )}
 
         {completed ? (
           /* Completion screen */
