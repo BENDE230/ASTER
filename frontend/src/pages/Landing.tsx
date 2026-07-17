@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth, SignInButton } from '@clerk/clerk-react'
 import {
   Moon, CheckCircle, Brain, Shield, Sparkles, BookOpen,
-  ChevronRight, Star, ArrowRight, Zap, Heart, TrendingUp, Clock,
+  ChevronRight, ArrowRight, Zap, Heart, TrendingUp, Clock,
 } from 'lucide-react'
 import { AnalyticsEvents, track } from '../lib/analytics'
 import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '../lib/support'
@@ -85,30 +85,6 @@ const STEPS = [
     icon: TrendingUp,
     title: 'Observe ton évolution',
     desc: 'Chaque semaine, une vue claire de tes patterns. Tu commences à te comprendre vraiment.',
-  },
-]
-
-const TESTIMONIALS = [
-  {
-    initial: 'C',
-    name: 'Camille R.',
-    role: 'Enseignante, 29 ans',
-    text: 'J\'avais du mal à nommer ce que je ressentais. ASTER m\'a appris à m\'écouter sans me juger. C\'est devenu un rituel que j\'attends.',
-    stars: 5,
-  },
-  {
-    initial: 'T',
-    name: 'Thomas L.',
-    role: 'Développeur, 34 ans',
-    text: 'La cohérence cardiaque m\'a changé la vie. Je la fais chaque matin. Mon niveau de stress a baissé de façon visible en 3 semaines.',
-    stars: 5,
-  },
-  {
-    initial: 'S',
-    name: 'Sarah M.',
-    role: 'Infirmière, 27 ans',
-    text: 'Après des gardes difficiles, le journal + l\'analyse IA m\'aide vraiment à déposer la journée. Je dors mieux depuis que j\'utilise ASTER.',
-    stars: 5,
   },
 ]
 
@@ -389,35 +365,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-16 px-5 max-w-5xl mx-auto">
-        <div className="text-center mb-10">
-          <p className="text-xs text-periwinkle-400 font-semibold uppercase tracking-widest mb-2">Ils témoignent</p>
-          <h2 className="text-2xl sm:text-3xl font-bold">Ils ont retrouvé leur calme.</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {TESTIMONIALS.map(t => (
-            <div key={t.name} className="rounded-xl border border-navy-700 bg-navy-800 p-5 flex flex-col gap-4">
-              <div className="flex gap-0.5">
-                {Array(t.stars).fill(0).map((_, i) => (
-                  <Star key={i} size={12} className="text-amber-400 fill-amber-400" />
-                ))}
-              </div>
-              <p className="text-sm text-slate-300 leading-relaxed flex-1">"{t.text}"</p>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-periwinkle-500/20 border border-periwinkle-500/30 flex items-center justify-center text-periwinkle-300 text-sm font-bold flex-shrink-0">
-                  {t.initial}
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-white">{t.name}</p>
-                  <p className="text-xs text-slate-500">{t.role}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* Pricing */}
       <section id="tarifs" className="py-16 px-5 bg-navy-900/40 border-y border-navy-800">
         <div className="max-w-4xl mx-auto">
@@ -534,10 +481,12 @@ export default function Landing() {
             <span className="font-bold text-slate-400 tracking-widest">ASTER</span>
             <span>· Bien-être émotionnel</span>
           </div>
-          <div className="flex items-center gap-5">
+          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
             <a href="#tarifs" className="hover:text-slate-400 transition-colors">Tarifs</a>
             <a href="#avis" className="hover:text-slate-400 transition-colors">Avis</a>
             <a href={SUPPORT_MAILTO} className="hover:text-slate-400 transition-colors">Contact</a>
+            <Link to="/cgu" className="hover:text-slate-400 transition-colors">CGU</Link>
+            <Link to="/confidentialite" className="hover:text-slate-400 transition-colors">Confidentialité</Link>
             <button onClick={handleStart} className="hover:text-slate-400 transition-colors">Commencer</button>
             {!isSignedIn && (
               <SignInButton mode="modal">

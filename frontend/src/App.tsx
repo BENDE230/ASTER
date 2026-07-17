@@ -7,6 +7,7 @@ import ProtectedLayout from './components/ProtectedLayout'
 import Landing from './pages/Landing'
 import Onboarding from './pages/Onboarding'
 import SpaceReady from './pages/SpaceReady'
+import { CGU, Confidentialite } from './pages/Legal'
 
 const PROTECTED_PATHS = ['/dashboard', '/checkin', '/journal', '/protocols', '/insights', '/profile']
 
@@ -27,6 +28,8 @@ function AppLayout() {
         <Route path="/" element={<Landing />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/space-ready" element={<SpaceReady />} />
+        <Route path="/cgu" element={<CGU />} />
+        <Route path="/confidentialite" element={<Confidentialite />} />
         <Route element={<ProtectedRoute><ProtectedLayout /></ProtectedRoute>}>
           <Route path="/dashboard" />
           <Route path="/checkin" />

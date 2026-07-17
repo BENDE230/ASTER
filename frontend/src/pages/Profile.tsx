@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useUser, useClerk } from '@clerk/clerk-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { LogOut, Crown, CreditCard, Calendar, ChevronRight, User, Shield, ExternalLink, Bell, BellOff, Send, Mail } from 'lucide-react'
 import { useApi } from '../hooks/useApi'
 import { useCachedQuery } from '../hooks/useCachedQuery'
@@ -373,6 +373,12 @@ export default function Profile() {
             <ChevronRight size={14} className="text-slate-600 flex-shrink-0" />
           </div>
         </a>
+
+        <div className="flex items-center justify-center gap-4 mb-4 text-xs text-slate-600">
+          <Link to="/cgu" className="hover:text-slate-400 transition-colors">CGU</Link>
+          <span>·</span>
+          <Link to="/confidentialite" className="hover:text-slate-400 transition-colors">Confidentialité</Link>
+        </div>
 
         {/* Sign out */}
         <button
